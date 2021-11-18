@@ -6,52 +6,370 @@
 
 using namespace std;
 
-class Board{
-public: 
-string boardSpaces[40];
+class Property{
+public:
+    string name;
+    int price;
+    string color;
+    int rent;
+    int rent1House;
+    int rent2House;
+    int rent3House;
+    int rent4House;
+    int rentHotel;
+    bool isMortgaged;
+    int mortgageValue;
+    bool isChest;
+    bool isChance;
+    bool isTax;
+    bool isParking;
+    bool isGo;
+    bool isRailroad;
+    bool isUtility;
+    bool isJail;
 
-Board(){
-boardSpaces[0] = "Go!";
-boardSpaces[1] = "Mediterannean Avenue";
-boardSpaces[2] = "Community Chest 1";
-boardSpaces[3] = "Baltic Avenue";
-boardSpaces[4] = "Income Tax";
-boardSpaces[5] = "Reading Railroad";
-boardSpaces[6] = "Oriental Avenue";
-boardSpaces[7] = "Chance 1";
-boardSpaces[8] = "Vermont Avenue";
-boardSpaces[9] = "Connecticut Avenue";
-boardSpaces[10] = "Jail";
-boardSpaces[11] = "St. Charles Place";
-boardSpaces[12] = "Electric Company";
-boardSpaces[13] = "States Avenue";
-boardSpaces[14] = "Virginia Avenue";
-boardSpaces[15] = "Pennsylvania Railroad";
-boardSpaces[16] = "St. James Place";
-boardSpaces[17] = "Community Chest 2";
-boardSpaces[18] = "Tenessee Avenue";
-boardSpaces[19] = "New York Avenue";
-boardSpaces[20] = "Free Parking";
-boardSpaces[21] = "Kentucky Avenue";
-boardSpaces[22] = "Chance 2";
-boardSpaces[23] = "Indiana Avenue";
-boardSpaces[24] = "Illinois Avenue";
-boardSpaces[25] = "B. & O Railroad";
-boardSpaces[26] = "Atlantic Avenue";
-boardSpaces[27] = "Ventnor Avenue";
-boardSpaces[28] = "Water Works";
-boardSpaces[29] = "Marvin Gardens";
-boardSpaces[30] = "Go to Jail!";
-boardSpaces[31] = "Pacific Avenue";
-boardSpaces[32] = "North Carolina Avenue";
-boardSpaces[33] = "Community Chest 3";
-boardSpaces[34] = "Pennsylvania Avenue";
-boardSpaces[35] = "Short Line Railroad";
-boardSpaces[36] = "Chance 3";
-boardSpaces[37] = "Park Place";
-boardSpaces[38] = "Luxury Tax";
-boardSpaces[39] = "Boardwalk";
-}
+    Property(){
+         price = 0;
+         isMortgaged = 0;
+         mortgageValue = 0;
+         isChest = 0;
+         isChance = 0;
+         isTax = 0;
+         isParking = 0;
+         isGo = 0;
+         isRailroad = 0;
+         isUtility = 0;
+         isJail = 0;
+         rent = 0;
+         rent1House = 0;
+         rent2House = 0;
+         rent3House = 0;
+         rent4House = 0;
+         rentHotel = 0;
+    }
+};
+
+
+class Board: Property{
+public:
+    Property BoardSpaces[40];
+
+    Board(){
+        BoardSpaces[0].name = "Go!";
+        BoardSpaces[0].isGo = 1;
+
+        BoardSpaces[1].name = "Mediterranean Avenue";
+        BoardSpaces[1].price = 60;
+        BoardSpaces[1].color = "Brown";
+        BoardSpaces[1].mortgageValue = 30;
+        BoardSpaces[1].rent = 2;
+        BoardSpaces[1].rent1House = 10;
+        BoardSpaces[1].rent2House = 30;
+        BoardSpaces[1].rent3House = 90;
+        BoardSpaces[1].rent4House = 160;
+        BoardSpaces[1].rentHotel = 250;
+
+        BoardSpaces[2].name = "Community Chest 1";
+        BoardSpaces[2].isChest = 1;
+
+        BoardSpaces[3].name = "Baltic Avenue";
+        BoardSpaces[3].price = 60;
+        BoardSpaces[3].color = "Brown";
+        BoardSpaces[3].mortgageValue = 30;
+        BoardSpaces[3].rent = 4;
+        BoardSpaces[3].rent1House = 20;
+        BoardSpaces[3].rent2House = 60;
+        BoardSpaces[3].rent3House = 180;
+        BoardSpaces[3].rent4House = 320;
+        BoardSpaces[3].rentHotel = 450;
+
+        BoardSpaces[4].name = "Income Tax";
+        BoardSpaces[4].isTax = 1;
+
+        BoardSpaces[5].name = "Reading Railroad";
+        BoardSpaces[5].price = 200;
+        BoardSpaces[5].mortgageValue = 100;
+        BoardSpaces[5].rent = 25;
+        BoardSpaces[5].isRailroad = 1;
+
+        BoardSpaces[6].name = "Oriental Avenue";
+        BoardSpaces[6].price = 100;
+        BoardSpaces[6].color = "Light Blue";
+        BoardSpaces[6].mortgageValue = 50;
+        BoardSpaces[6].rent = 6;
+        BoardSpaces[6].rent1House = 30;
+        BoardSpaces[6].rent2House = 90;
+        BoardSpaces[6].rent3House = 270;
+        BoardSpaces[6].rent4House = 400;
+        BoardSpaces[6].rentHotel = 550;
+
+        BoardSpaces[7].name = "Chance 1";
+        BoardSpaces[7].isChance = 1;
+
+        BoardSpaces[8].name = "Vermont Avenue";
+        BoardSpaces[8].price = 100;
+        BoardSpaces[8].color = "Light Blue";
+        BoardSpaces[8].mortgageValue = 50;
+        BoardSpaces[8].rent = 6;
+        BoardSpaces[8].rent1House = 30;
+        BoardSpaces[8].rent2House = 90;
+        BoardSpaces[8].rent3House = 270;
+        BoardSpaces[8].rent4House = 400;
+        BoardSpaces[8].rentHotel = 550;
+
+        BoardSpaces[9].name = "Connecticut Avenue";
+        BoardSpaces[9].price = 120;
+        BoardSpaces[9].color = "Light Blue";
+        BoardSpaces[9].mortgageValue = 60;
+        BoardSpaces[9].rent = 8;
+        BoardSpaces[9].rent1House = 40;
+        BoardSpaces[9].rent2House = 100;
+        BoardSpaces[9].rent3House = 300;
+        BoardSpaces[9].rent4House = 450;
+        BoardSpaces[9].rentHotel = 600;
+
+        BoardSpaces[10].name = "Jail";
+        BoardSpaces[10].isJail = 1;
+
+        BoardSpaces[11].name = "St. Charles Place";
+        BoardSpaces[11].price = 140;
+        BoardSpaces[11].color = "Pink";
+        BoardSpaces[11].mortgageValue = 70;
+        BoardSpaces[11].rent = 10;
+        BoardSpaces[11].rent1House = 50;
+        BoardSpaces[11].rent2House = 150;
+        BoardSpaces[11].rent3House = 450;
+        BoardSpaces[11].rent4House = 625;
+        BoardSpaces[11].rentHotel = 750;
+
+        BoardSpaces[12].name = "Electric Company";
+        BoardSpaces[12].price = 150;
+        BoardSpaces[12].mortgageValue = 75;
+        BoardSpaces[12].rent = 0; // calculate rent based on dice roll
+        BoardSpaces[12].isUtility = 1;
+
+        BoardSpaces[13].name = "States Avenue";
+        BoardSpaces[13].price = 140;
+        BoardSpaces[13].color = "Pink";
+        BoardSpaces[13].mortgageValue = 70;
+        BoardSpaces[13].rent = 10;
+        BoardSpaces[13].rent1House = 50;
+        BoardSpaces[13].rent2House = 150;
+        BoardSpaces[13].rent3House = 450;
+        BoardSpaces[13].rent4House = 625;
+        BoardSpaces[13].rentHotel = 750;
+
+        BoardSpaces[14].name = "Virginia Avenue";
+        BoardSpaces[14].price = 160;
+        BoardSpaces[14].color = "Pink";
+        BoardSpaces[14].mortgageValue = 80;
+        BoardSpaces[14].rent = 12;
+        BoardSpaces[14].rent1House = 60;
+        BoardSpaces[14].rent2House = 180;
+        BoardSpaces[14].rent3House = 500;
+        BoardSpaces[14].rent4House = 700;
+        BoardSpaces[14].rentHotel = 900;
+
+        BoardSpaces[15].name = "Pennsylvania Railroad";
+        BoardSpaces[15].price = 200;
+        BoardSpaces[15].mortgageValue = 100;
+        BoardSpaces[15].rent = 25;
+        BoardSpaces[15].isRailroad = 1;
+
+        BoardSpaces[16].name = "St. James Place";
+        BoardSpaces[16].price = 180;
+        BoardSpaces[16].color = "Orange";
+        BoardSpaces[16].mortgageValue = 90;
+        BoardSpaces[16].rent = 14;
+        BoardSpaces[16].rent1House = 70;
+        BoardSpaces[16].rent2House = 200;
+        BoardSpaces[16].rent3House = 550;
+        BoardSpaces[16].rent4House = 750;
+        BoardSpaces[16].rentHotel = 950;
+
+        BoardSpaces[17].name = "Community Chest 2";
+        BoardSpaces[17].mortgageValue = 30;
+        BoardSpaces[17].isChest = 1;
+
+        BoardSpaces[18].name = "Tennessee Avenue";
+        BoardSpaces[18].price = 180;
+        BoardSpaces[18].color = "Orange";
+        BoardSpaces[18].mortgageValue = 90;
+        BoardSpaces[18].rent = 14;
+        BoardSpaces[18].rent1House = 70;
+        BoardSpaces[18].rent2House = 200;
+        BoardSpaces[18].rent3House = 550;
+        BoardSpaces[18].rent4House = 750;
+        BoardSpaces[18].rentHotel = 950;
+
+        BoardSpaces[19].name = "New York Avenue";
+        BoardSpaces[19].price = 200;
+        BoardSpaces[19].color = "Orange";
+        BoardSpaces[19].mortgageValue = 100;
+        BoardSpaces[19].rent = 16;
+        BoardSpaces[19].rent1House = 80;
+        BoardSpaces[19].rent2House = 220;
+        BoardSpaces[19].rent3House = 600;
+        BoardSpaces[19].rent4House = 800;
+        BoardSpaces[19].rentHotel = 1000;
+
+        BoardSpaces[20].name = "Free Parking";
+        BoardSpaces[20].isParking = 1;
+
+        BoardSpaces[21].name = "Kentucky Avenue";
+        BoardSpaces[21].price = 220;
+        BoardSpaces[21].color = "Red";
+        BoardSpaces[21].mortgageValue = 110;
+        BoardSpaces[21].rent = 18;
+        BoardSpaces[21].rent1House = 90;
+        BoardSpaces[21].rent2House = 250;
+        BoardSpaces[21].rent3House = 700;
+        BoardSpaces[21].rent4House = 875;
+        BoardSpaces[21].rentHotel = 1050;
+
+        BoardSpaces[22].name = "Chance 2";
+        BoardSpaces[22].isChance = 1;
+
+        BoardSpaces[23].name = "Indiana Avenue";
+        BoardSpaces[23].price = 220;
+        BoardSpaces[23].color = "Red";
+        BoardSpaces[23].mortgageValue = 110;
+        BoardSpaces[23].rent = 18;
+        BoardSpaces[23].rent1House = 90;
+        BoardSpaces[23].rent2House = 250;
+        BoardSpaces[23].rent3House = 700;
+        BoardSpaces[23].rent4House = 875;
+        BoardSpaces[23].rentHotel = 1050;
+
+        BoardSpaces[24].name = "Illinois Avenue";
+        BoardSpaces[24].price = 240;
+        BoardSpaces[24].color = "Red";
+        BoardSpaces[24].mortgageValue = 120;
+        BoardSpaces[24].rent = 20;
+        BoardSpaces[24].rent1House = 100;
+        BoardSpaces[24].rent2House = 300;
+        BoardSpaces[24].rent3House = 750;
+        BoardSpaces[24].rent4House = 925;
+        BoardSpaces[24].rentHotel = 1100;
+
+        BoardSpaces[25].name = "B. & O Railroad";
+        BoardSpaces[25].price = 200;
+        BoardSpaces[25].mortgageValue = 100;
+        BoardSpaces[25].rent = 25;
+        BoardSpaces[25].isRailroad = 1;
+
+        BoardSpaces[26].name = "Atlantic Avenue";
+        BoardSpaces[26].price = 260;
+        BoardSpaces[26].color = "Yellow";
+        BoardSpaces[26].mortgageValue = 130;
+        BoardSpaces[26].rent = 22;
+        BoardSpaces[26].rent1House = 110;
+        BoardSpaces[26].rent2House = 330;
+        BoardSpaces[26].rent3House = 800;
+        BoardSpaces[26].rent4House = 975;
+        BoardSpaces[26].rentHotel = 1150;
+
+        BoardSpaces[27].name = "Ventnor Avenue";
+        BoardSpaces[27].price = 260;
+        BoardSpaces[27].color = "Yellow";
+        BoardSpaces[27].mortgageValue = 130;
+        BoardSpaces[27].rent = 22;
+        BoardSpaces[27].rent1House = 110;
+        BoardSpaces[27].rent2House = 330;
+        BoardSpaces[27].rent3House = 800;
+        BoardSpaces[27].rent4House = 975;
+        BoardSpaces[27].rentHotel = 1150;
+
+        BoardSpaces[28].name = "Water Works";
+        BoardSpaces[28].price = 150;
+        BoardSpaces[28].mortgageValue = 75;
+        BoardSpaces[28].rent = 0;// rent based on dice roll
+        BoardSpaces[28].isUtility = 1;
+
+        BoardSpaces[29].name = "Marvin Gardens";
+        BoardSpaces[29].price = 280;
+        BoardSpaces[29].color = "Yellow";
+        BoardSpaces[29].mortgageValue = 140;
+        BoardSpaces[29].rent = 24;
+        BoardSpaces[29].rent1House = 120;
+        BoardSpaces[29].rent2House = 360;
+        BoardSpaces[29].rent3House = 850;
+        BoardSpaces[29].rent4House = 1025;
+        BoardSpaces[29].rentHotel = 1200;
+
+        BoardSpaces[30].name = "Go to Jail!";
+        BoardSpaces[30].isJail = 1;
+
+        BoardSpaces[31].name = "Pacific Avenue";
+        BoardSpaces[31].price = 300;
+        BoardSpaces[31].color = "Green";
+        BoardSpaces[31].mortgageValue = 150;
+        BoardSpaces[31].rent = 26;
+        BoardSpaces[31].rent1House = 130;
+        BoardSpaces[31].rent2House = 390;
+        BoardSpaces[31].rent3House = 900;
+        BoardSpaces[31].rent4House = 1100;
+        BoardSpaces[31].rentHotel = 1275;
+
+        BoardSpaces[32].name = "North Carolina Avenue";
+        BoardSpaces[32].price = 300;
+        BoardSpaces[32].color = "Green";
+        BoardSpaces[32].mortgageValue = 150;
+        BoardSpaces[32].rent = 26;
+        BoardSpaces[32].rent1House = 130;
+        BoardSpaces[32].rent2House = 390;
+        BoardSpaces[32].rent3House = 900;
+        BoardSpaces[32].rent4House = 1100;
+        BoardSpaces[32].rentHotel = 1275;
+
+        BoardSpaces[33].name = "Community Chest 3";
+        BoardSpaces[33].isChest = 1;
+
+        BoardSpaces[34].name = "Pennsylvania Avenue";
+        BoardSpaces[34].price = 320;
+        BoardSpaces[34].color = "Green";
+        BoardSpaces[34].mortgageValue = 160;
+        BoardSpaces[34].rent = 28;
+        BoardSpaces[34].rent1House = 150;
+        BoardSpaces[34].rent2House = 450;
+        BoardSpaces[34].rent3House = 1000;
+        BoardSpaces[34].rent4House = 1200;
+        BoardSpaces[34].rentHotel = 1400;
+
+        BoardSpaces[35].name = "Short Line Railroad";
+        BoardSpaces[35].price = 200;
+        BoardSpaces[35].mortgageValue = 100;
+        BoardSpaces[35].rent = 25;
+        BoardSpaces[35].isRailroad = 1;
+
+        BoardSpaces[36].name = "Chance 3";
+        BoardSpaces[36].isChance = 1;
+
+        BoardSpaces[37].name = "Park Place";
+        BoardSpaces[37].price = 350;
+        BoardSpaces[37].color = "Dark Blue";
+        BoardSpaces[37].mortgageValue = 175;
+        BoardSpaces[37].rent = 35;
+        BoardSpaces[37].rent1House = 175;
+        BoardSpaces[37].rent2House = 500;
+        BoardSpaces[37].rent3House = 1100;
+        BoardSpaces[37].rent4House = 1300;
+        BoardSpaces[37].rentHotel = 1500;
+
+        BoardSpaces[38].name = "Luxury Tax";
+        BoardSpaces[38].isTax = 1;
+
+        BoardSpaces[39].name = "Boardwalk";
+        BoardSpaces[39].price = 400;
+        BoardSpaces[39].color = "Dark Blue";
+        BoardSpaces[39].mortgageValue = 200;
+        BoardSpaces[39].rent = 50;
+        BoardSpaces[39].rent1House = 200;
+        BoardSpaces[39].rent2House = 600;
+        BoardSpaces[39].rent3House = 1400;
+        BoardSpaces[39].rent4House = 1700;
+        BoardSpaces[39].rentHotel = 2000;
+    }
 
 };
 
@@ -64,12 +382,19 @@ public:
 
     int turnsJail; // turns potentially spent in jail
     int jailOut; // has a get out of jail free card
-    int jailFree;
     bool isComputer;
-    int numDoubles;
     int numHouses;
     int numHotels;
+    int ownBrown;
+    int ownLightBlue;
+    int ownPink;
+    int ownOrange;
+    int ownRed;
+    int ownYellow;
+    int ownGreen;
+    int ownDarkBlue;
 
+    
     void getBalance(Player &positionPlayer)
     {
         cout << "position balance is: " << positionPlayer.balance << endl;
@@ -322,22 +647,20 @@ void chestCard(int numPlayers, Player allPlayers[])
 Player()
 {
   isComputer = 0;
-  position = 0;
-  numDoubles = 0;
-  balance = 1500;
-  numHotels = 0;
-  numHouses = 0;
-  jailFree = 0;
+        position = 0;
+        numDoubles = 0;
+        numHotels = 0;
+        numHouses = 0;
+        balance = 1500;
+        jailFree = 0;
+        jailOut = 0;
+        ownBrown = 0;
+        ownLightBlue = 0;
+        ownPink = 0;
+        ownOrange = 0;
+        ownRed = 0;
+        ownYellow = 0;
+        ownGreen = 0;
+        ownDarkBlue = 0;
 }
 };
-
-
-
-
-
-
-
-
-
-
-

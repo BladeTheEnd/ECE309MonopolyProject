@@ -6,7 +6,7 @@
 
 using namespace std;
 
-class Property{
+class Property : public error_code {
 public:
     string name;
     int price;
@@ -39,7 +39,6 @@ public:
          isGo = 0;
          isRailroad = 0;
          isUtility = 0;
-         isJail = 0;
          rent = 0;
          rent1House = 0;
          rent2House = 0;
@@ -381,7 +380,9 @@ private:
 public:
 
     int turnsJail; // turns potentially spent in jail
-    int jailOut; // has a get out of jail free card
+    int jailFree; // has a get out of jail free card
+    bool isJail;
+    int numDoubles;
     bool isComputer;
     int numHouses;
     int numHotels;
@@ -402,7 +403,7 @@ public:
 
 void getPosition(Board &positionBoard)
 {
-	cout << positionBoard.boardSpaces[position] << endl;
+	cout << positionBoard.BoardSpaces[position] << endl;
 }
 
 void setComputer()
@@ -437,32 +438,34 @@ void rollDice(Board &positionBoard, int numPlayers, Player allPlayers[])
     }
     }
     
-    turnsJail =  jailCheck(currentBoard);
-    getPosition(currentBoard);
+    turnsJail =  jailCheck(positionBoard);
+    getPosition(positionBoard);
     
     if(numDoubles) rollDice(positionBoard, numPlayers, allPlayers);
     
 }
 
-int jailCheck(Board &currentBoard) {
-        if (position == 30) {
+bool jailCheck(Board &positionBoard) {
+        if (position == 30) { // return 1 for in jail, return 0 for out of jail
             position = 10;
-            if (jailOut == 1) {
-                jailOut = 0;
-                return 0;
+            turnsJail = 3;
+
+            if (jailFree == 1) {
+                jailFree = 0;
+                turnsJail = 0;
+                return false;
             }
-            else{
-                if(turnsJail != 0){
-                    turnsJail = turnsJail - 1;
-                    return turnsJail;
-                }
-                else
-                    return 3;
-            }
+
+            return true;
         }
-        else
-            return 0;
-    }
+            else{
+                if(turnsJail > 0){
+                    turnsJail = turnsJail - 1;
+                    return true;
+                }
+            }
+    return false;
+        }
 
 void chanceCard(int numPlayers, Player allPlayers[])
 {
@@ -653,7 +656,7 @@ Player()
         numHouses = 0;
         balance = 1500;
         jailFree = 0;
-        jailOut = 0;
+        turnsJail = 0;
         ownBrown = 0;
         ownLightBlue = 0;
         ownPink = 0;

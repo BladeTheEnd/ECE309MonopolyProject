@@ -453,26 +453,57 @@ if(turnsJail == 0)
     
 }
 
-bool jailCheck(Board &positionBoard) {
-        if (position == 30) { // return 1 for in jail, return 0 for out of jail
+bool jailCheck(Board &positionBoard) { //what should function return if not on jail?
+        if(position == 30) {
             position = 10;
             turnsJail = 3;
-
-            if (jailFree == 1) {
-                jailFree = 0;
-                turnsJail = 0;
-                return false;
-            }
-
-            return false;
         }
-            else{
-                if(turnsJail > 0){
-                    turnsJail = turnsJail - 1;
+
+    int diceRoll1 = rand() % 6 + 1;
+    int diceRoll2 = rand() % 6 + 1;
+
+        if(turnsJail > 0 && diceRoll1 == diceRoll2){      // need to get dice roll values
+                turnsJail = 0;
+                return 0;
+
+        }
+
+            if (jailFree >= 1) {
+                cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
+                string temp;
+                cin >> temp;
+                if(temp == "yes"){              // using get out of jail free card
+                    jailFree -= 1;
+                    turnsJail = 0;
                     return true;
                 }
             }
-    return false;
+            if(turnsJail > 0) {
+                cout << "Do you wish to pay $50 to get out of jail?" << endl;
+                string temp;
+                cin >> temp;
+                if (temp == "yes") {              // paying to get out of jail
+                    turnsJail = 0;
+                    balance -= 50;
+                    return true;
+                }
+            }
+
+
+          if(turnsJail == 1){                // waited out turns in jail
+             turnsJail -= 1;
+             return true;
+          }
+
+          if(turnsJail > 1){                // decrementing turns left in jail
+              turnsJail -= 1;
+              return false;
+          }
+
+
+
+
+    return false;           // if not on jail position
         }
 
 void chanceCard(int numPlayers, Player allPlayers[])
@@ -539,7 +570,7 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 6:
-      cout << "You pulled Advance to Nearest Utitiliy from the chance deck!" << endl;
+      cout << "You pulled Advance to Nearest Utility from the chance deck!" << endl;
       if(position < 12) position = 12;
       else if(position >= 28)
       {

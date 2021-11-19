@@ -382,7 +382,9 @@ public:
 
     int turnsJail; // turns potentially spent in jail
     int jailOut; // has a get out of jail free card
+    int jailFree;
     bool isComputer;
+    int numDoubles;
     int numHouses;
     int numHotels;
     int ownBrown;
@@ -402,7 +404,7 @@ public:
 
 void getPosition(Board &positionBoard)
 {
-	cout << positionBoard.boardSpaces[position] << endl;
+	cout << positionBoard.BoardSpaces[position].name << endl;
 }
 
 void setComputer()
@@ -411,6 +413,8 @@ void setComputer()
 }
 
 void rollDice(Board &positionBoard, int numPlayers, Player allPlayers[])
+{
+if(turnsJail == 0)
 {
     int diceRoll1 = rand() % 6 + 1;
     int diceRoll2 = rand() % 6 + 1;
@@ -432,37 +436,44 @@ void rollDice(Board &positionBoard, int numPlayers, Player allPlayers[])
     position = position + diceRoll1 + diceRoll2;
     if(position >= 40)
     { 
+      cout << "You passed Go!" << endl;
       position = position - 40;
       balance = balance + 200;
     }
     }
+}
     
-    turnsJail =  jailCheck(currentBoard);
-    getPosition(currentBoard);
+    bool jailEscape =  jailCheck(positionBoard);
+    if(positionBoard.BoardSpaces[position].isChest == 1) chestCard(numPlayers, allPlayers);
+    if(positionBoard.BoardSpaces[position].isChance == 1) chanceCard(numPlayers, allPlayers);
     
-    if(numDoubles) rollDice(positionBoard, numPlayers, allPlayers);
+    getPosition(positionBoard);
+    
+    if(numDoubles || jailEscape) rollDice(positionBoard, numPlayers, allPlayers); //or with jail boolean
     
 }
 
-int jailCheck(Board &currentBoard) {
-        if (position == 30) {
+bool jailCheck(Board &positionBoard) {
+        if (position == 30) { // return 1 for in jail, return 0 for out of jail
             position = 10;
-            if (jailOut == 1) {
-                jailOut = 0;
-                return 0;
+            turnsJail = 3;
+
+            if (jailFree == 1) {
+                jailFree = 0;
+                turnsJail = 0;
+                return false;
             }
-            else{
-                if(turnsJail != 0){
-                    turnsJail = turnsJail - 1;
-                    return turnsJail;
-                }
-                else
-                    return 3;
-            }
+
+            return false;
         }
-        else
-            return 0;
-    }
+            else{
+                if(turnsJail > 0){
+                    turnsJail = turnsJail - 1;
+                    return true;
+                }
+            }
+    return false;
+        }
 
 void chanceCard(int numPlayers, Player allPlayers[])
 {
@@ -471,27 +482,41 @@ void chanceCard(int numPlayers, Player allPlayers[])
   switch(chanceIndex)
   {
       case 0:
+      cout << "You pulled Advance to Boardwalk from the chance deck!" << endl;
       position = 39;
       break;
       
       case 1:
+      cout << "You pulled Advance to Go! from the chance deck!" << endl;
       position = 0;
       balance = balance + 200;
       break;
       
       case 2:
-      if(position >= 25) balance = balance + 200;
+      cout << "You pulled Advance to Illinois Avenue from the chance deck!" << endl;
+      if(position >= 25)
+      {
+        cout << "You passed Go!" << endl;
+       balance = balance + 200;
+       }
       position = 24;
       break;
       
       case 3:
-      if(position >= 12) balance = balance + 200;
+      cout << "You pulled Advance to St. Charles Place from the chance deck!" << endl;
+      if(position >= 12)
+      {
+        cout << "You passed Go!" << endl;
+        balance = balance + 200;
+      } 
       position = 11;
       break;
       
       case 4:
+      cout << "You pulled Advance to Nearest Railroad from the chance deck!" << endl;
       if(position < 5 || position > 35)
       {
+       cout << "You passed Go!" << endl;
        position = 5;
        balance = balance + 200;
       }
@@ -501,8 +526,10 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 5:
+      cout << "You pulled Advance to Nearest Railroad from the chance deck!" << endl;
       if(position < 5 || position > 35)
       {
+        cout << "You passed Go!" << endl;
        position = 5;
        balance = balance + 200;
       }
@@ -512,9 +539,11 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 6:
+      cout << "You pulled Advance to Nearest Utitiliy from the chance deck!" << endl;
       if(position < 12) position = 12;
       else if(position >= 28)
       {
+        cout << "You passed Go!" << endl;
         position = 12;
         balance = balance + 200;
       }
@@ -522,36 +551,44 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 7:
+      cout << "You pulled Bank Pays you Dividend from the chance deck!" << endl;
       balance = balance + 50;
       break;
       
       case 8:
+      cout << "You pulled Get out of Jail Free from the chance deck!" << endl;
       jailFree = jailFree + 1;
       break;
       
       case 9:
+      cout << "You pulled Go back from 3 spaces  from the chance deck!" << endl;
       position = position - 3;
       break;
       
       case 10:
+      cout << "You pulled Go to Jail from the chance deck!" << endl;
       position = 10;
       break;
       
       case 11:
+      cout << "You pulled Make general repairs on all your property. For each house pay $25. For each hotel pay $100 from the chance deck!" << endl;
       balance = balance - numHouses * 25;
       balance = balance - numHotels * 100;
       break;
       
       case 12:
+      cout << "You pulled Speeding fine $15 from the chance deck!" << endl;
       balance = balance - 15;
       break;
       
       case 13:
+      cout << "You pulled Take a trip to Reading Railroad. If you pass Go, collect $200 from the chance deck!" << endl;
       if(position >= 6) balance = balance + 200;
       position = 5;
       break;
       
       case 14:
+      cout << "You pulled You have been elected Chairman of the Board. Pay each player $50 from the chance deck!" << endl;
       for(int i = 0; i<numPlayers; i++)
       {
         allPlayers[i].balance = allPlayers[i].balance + 50;
@@ -560,6 +597,7 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 15:
+      cout << "You pulled Your building loan matures. Collect $150 from the chance deck!" << endl;
       balance = balance + 100;
       break;
   }
@@ -572,39 +610,48 @@ void chestCard(int numPlayers, Player allPlayers[])
   switch(chestIndex)
   {
       case 0:
+      cout << "You pulled Advance to Go (Collect $200) from the Community Chest!" << endl;
       position = 0;
       balance = balance + 200;
       break;
       
       case 1:
+      cout << "You pulled Bank error in your favor. Collect $200 from the Community Chest!" << endl;
       balance = balance + 200;
       break;
       
       case 2:
+      cout << "You pulled Doctor’s fee. Pay $50 from the Community Chest!" << endl;
       balance = balance - 50;
       break;
       
       case 3:
+      cout << "You pulled From sale of stock you get $50 from the Community Chest!" << endl;
       balance = balance + 50;
       break;
       
       case 4:
+      cout << "You pulled Get Out of Jail Free from the Community Chest!" << endl;
       jailFree = jailFree + 1;
       break;
       
       case 5:
+      cout << "You pulled Go to Jail. Go directly to jail, do not pass Go, do not collect $200 from the Community Chest!" << endl;
       position = 10;
       break;
       
       case 6:
+      cout << "You pulled Holiday fund matures. Receive $100 from the Community Chest!" << endl;
       balance = balance + 200;
       break;
       
       case 7:
+      cout << "You pulled Income tax refund. Collect $20 from the Community Chest!" << endl;
       balance = balance + 20;
       break;
       
       case 8:
+      cout << "You pulled It is your birthday. Collect $10 from every player from the Community Chest!" << endl;
       for(int i = 0; i<numPlayers; i++)
       {
         allPlayers[i].balance = allPlayers[i].balance - 10;
@@ -613,31 +660,38 @@ void chestCard(int numPlayers, Player allPlayers[])
       break;
       
       case 9:
+      cout << "You pulled Life insurance matures. Collect $100 from the Community Chest!" << endl;
       balance = balance + 100;
       break;
       
       case 10:
+      cout << "You pulled Pay hospital fees of $100 from the Community Chest!" << endl;
       balance = balance - 100;
       break;
       
       case 11:
+      cout << "You pulled Pay school fees of $50 from the Community Chest!" << endl;
       balance = balance - 50;
       break;
       
       case 12:
+      cout << "You pulled Receive $25 consultancy fee from the Community Chest!" << endl;
       balance = balance - 25;
       break;
       
       case 13:
+      cout << "You pulled You are assessed for street repair. $40 per house. $115 per hotel from the Community Chest!" << endl;
       balance = balance - numHouses * 40;
       balance = balance - numHotels * 115;
       break;
       
       case 14:
+      cout << "You pulled You have won second prize in a beauty contest. Collect $10 from the Community Chest!" << endl;
       balance = balance + 10;
       break;
       
       case 15:
+      cout << "You pulled You inherit $100 from the Community Chest!" << endl;
       balance = balance + 100;
       break;
   }
@@ -652,6 +706,7 @@ Player()
         numHotels = 0;
         numHouses = 0;
         balance = 1500;
+        turnsJail = 0;
         jailFree = 0;
         jailOut = 0;
         ownBrown = 0;

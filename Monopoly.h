@@ -17,6 +17,7 @@ public:
     int rent3House;
     int rent4House;
     int rentHotel;
+    int buyHouse;
     bool isMortgaged;
     int mortgageValue;
     bool isChest;
@@ -46,6 +47,7 @@ public:
          rent3House = 0;
          rent4House = 0;
          rentHotel = 0;
+         buyHouse = 0;
     }
 };
 
@@ -68,6 +70,7 @@ public:
         BoardSpaces[1].rent3House = 90;
         BoardSpaces[1].rent4House = 160;
         BoardSpaces[1].rentHotel = 250;
+        BoardSpaces[1].buyHouse = 50;
 
         BoardSpaces[2].name = "Community Chest 1";
         BoardSpaces[2].isChest = 1;
@@ -82,6 +85,7 @@ public:
         BoardSpaces[3].rent3House = 180;
         BoardSpaces[3].rent4House = 320;
         BoardSpaces[3].rentHotel = 450;
+        BoardSpaces[3].buyHouse = 50;
 
         BoardSpaces[4].name = "Income Tax";
         BoardSpaces[4].isTax = 1;
@@ -102,6 +106,8 @@ public:
         BoardSpaces[6].rent3House = 270;
         BoardSpaces[6].rent4House = 400;
         BoardSpaces[6].rentHotel = 550;
+        BoardSpaces[6].buyHouse = 50;
+
 
         BoardSpaces[7].name = "Chance 1";
         BoardSpaces[7].isChance = 1;
@@ -116,6 +122,7 @@ public:
         BoardSpaces[8].rent3House = 270;
         BoardSpaces[8].rent4House = 400;
         BoardSpaces[8].rentHotel = 550;
+        BoardSpaces[8].buyHouse = 50;
 
         BoardSpaces[9].name = "Connecticut Avenue";
         BoardSpaces[9].price = 120;
@@ -127,6 +134,7 @@ public:
         BoardSpaces[9].rent3House = 300;
         BoardSpaces[9].rent4House = 450;
         BoardSpaces[9].rentHotel = 600;
+        BoardSpaces[9].buyHouse = 50;
 
         BoardSpaces[10].name = "Jail";
         BoardSpaces[10].isJail = 1;
@@ -141,6 +149,7 @@ public:
         BoardSpaces[11].rent3House = 450;
         BoardSpaces[11].rent4House = 625;
         BoardSpaces[11].rentHotel = 750;
+        BoardSpaces[11].buyHouse = 100;
 
         BoardSpaces[12].name = "Electric Company";
         BoardSpaces[12].price = 150;
@@ -158,6 +167,7 @@ public:
         BoardSpaces[13].rent3House = 450;
         BoardSpaces[13].rent4House = 625;
         BoardSpaces[13].rentHotel = 750;
+        BoardSpaces[13].buyHouse = 100;
 
         BoardSpaces[14].name = "Virginia Avenue";
         BoardSpaces[14].price = 160;
@@ -169,6 +179,7 @@ public:
         BoardSpaces[14].rent3House = 500;
         BoardSpaces[14].rent4House = 700;
         BoardSpaces[14].rentHotel = 900;
+        BoardSpaces[14].buyHouse = 100;
 
         BoardSpaces[15].name = "Pennsylvania Railroad";
         BoardSpaces[15].price = 200;
@@ -186,6 +197,7 @@ public:
         BoardSpaces[16].rent3House = 550;
         BoardSpaces[16].rent4House = 750;
         BoardSpaces[16].rentHotel = 950;
+        BoardSpaces[16].buyHouse = 100;
 
         BoardSpaces[17].name = "Community Chest 2";
         BoardSpaces[17].mortgageValue = 30;
@@ -201,6 +213,7 @@ public:
         BoardSpaces[18].rent3House = 550;
         BoardSpaces[18].rent4House = 750;
         BoardSpaces[18].rentHotel = 950;
+        BoardSpaces[18].buyHouse = 100;
 
         BoardSpaces[19].name = "New York Avenue";
         BoardSpaces[19].price = 200;
@@ -212,6 +225,7 @@ public:
         BoardSpaces[19].rent3House = 600;
         BoardSpaces[19].rent4House = 800;
         BoardSpaces[19].rentHotel = 1000;
+        BoardSpaces[19].buyHouse = 100;
 
         BoardSpaces[20].name = "Free Parking";
         BoardSpaces[20].isParking = 1;
@@ -226,6 +240,7 @@ public:
         BoardSpaces[21].rent3House = 700;
         BoardSpaces[21].rent4House = 875;
         BoardSpaces[21].rentHotel = 1050;
+        BoardSpaces[21].buyHouse = 150;
 
         BoardSpaces[22].name = "Chance 2";
         BoardSpaces[22].isChance = 1;
@@ -240,6 +255,7 @@ public:
         BoardSpaces[23].rent3House = 700;
         BoardSpaces[23].rent4House = 875;
         BoardSpaces[23].rentHotel = 1050;
+        BoardSpaces[23].buyHouse = 150;
 
         BoardSpaces[24].name = "Illinois Avenue";
         BoardSpaces[24].price = 240;
@@ -251,6 +267,7 @@ public:
         BoardSpaces[24].rent3House = 750;
         BoardSpaces[24].rent4House = 925;
         BoardSpaces[24].rentHotel = 1100;
+        BoardSpaces[24].buyHouse = 150;
 
         BoardSpaces[25].name = "B. & O Railroad";
         BoardSpaces[25].price = 200;
@@ -268,6 +285,7 @@ public:
         BoardSpaces[26].rent3House = 800;
         BoardSpaces[26].rent4House = 975;
         BoardSpaces[26].rentHotel = 1150;
+        BoardSpaces[26].buyHouse = 150;
 
         BoardSpaces[27].name = "Ventnor Avenue";
         BoardSpaces[27].price = 260;
@@ -279,6 +297,7 @@ public:
         BoardSpaces[27].rent3House = 800;
         BoardSpaces[27].rent4House = 975;
         BoardSpaces[27].rentHotel = 1150;
+        BoardSpaces[27].buyHouse = 150;
 
         BoardSpaces[28].name = "Water Works";
         BoardSpaces[28].price = 150;
@@ -296,6 +315,7 @@ public:
         BoardSpaces[29].rent3House = 850;
         BoardSpaces[29].rent4House = 1025;
         BoardSpaces[29].rentHotel = 1200;
+        BoardSpaces[29].buyHouse = 150;
 
         BoardSpaces[30].name = "Go to Jail!";
         BoardSpaces[30].isJail = 1;
@@ -310,6 +330,7 @@ public:
         BoardSpaces[31].rent3House = 900;
         BoardSpaces[31].rent4House = 1100;
         BoardSpaces[31].rentHotel = 1275;
+        BoardSpaces[31].buyHouse = 200;
 
         BoardSpaces[32].name = "North Carolina Avenue";
         BoardSpaces[32].price = 300;
@@ -321,6 +342,7 @@ public:
         BoardSpaces[32].rent3House = 900;
         BoardSpaces[32].rent4House = 1100;
         BoardSpaces[32].rentHotel = 1275;
+        BoardSpaces[32].buyHouse = 200;
 
         BoardSpaces[33].name = "Community Chest 3";
         BoardSpaces[33].isChest = 1;
@@ -335,6 +357,7 @@ public:
         BoardSpaces[34].rent3House = 1000;
         BoardSpaces[34].rent4House = 1200;
         BoardSpaces[34].rentHotel = 1400;
+        BoardSpaces[34].buyHouse = 200;
 
         BoardSpaces[35].name = "Short Line Railroad";
         BoardSpaces[35].price = 200;
@@ -355,6 +378,7 @@ public:
         BoardSpaces[37].rent3House = 1100;
         BoardSpaces[37].rent4House = 1300;
         BoardSpaces[37].rentHotel = 1500;
+        BoardSpaces[1].buyHouse = 200;
 
         BoardSpaces[38].name = "Luxury Tax";
         BoardSpaces[38].isTax = 1;
@@ -369,6 +393,7 @@ public:
         BoardSpaces[39].rent3House = 1400;
         BoardSpaces[39].rent4House = 1700;
         BoardSpaces[39].rentHotel = 2000;
+        BoardSpaces[39].buyHouse = 200;
     }
 
 };
@@ -453,26 +478,55 @@ if(turnsJail == 0)
     
 }
 
-bool jailCheck(Board &positionBoard) {
-        if (position == 30) { // return 1 for in jail, return 0 for out of jail
+bool jailCheck(Board &positionBoard) { //what should function return if not on jail?
+        if(position == 30) {
             position = 10;
             turnsJail = 3;
-
-            if (jailFree == 1) {
-                jailFree = 0;
-                turnsJail = 0;
-                return false;
-            }
-
-            return false;
         }
-            else{
-                if(turnsJail > 0){
-                    turnsJail = turnsJail - 1;
+
+    int diceRoll1 = rand() % 6 + 1;
+    int diceRoll2 = rand() % 6 + 1;
+
+        if(turnsJail > 0 && diceRoll1 == diceRoll2){      // need to get dice roll values
+                turnsJail = 0;
+            position = position + diceRoll1 + diceRoll2;
+                return 0;
+
+        }
+
+            if (jailFree >= 1) {
+                cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
+                string temp;
+                cin >> temp;
+                if(temp == "yes"){              // using get out of jail free card
+                    jailFree -= 1;
+                    turnsJail = 0;
                     return true;
                 }
             }
-    return false;
+            if(turnsJail > 0) {
+                cout << "Do you wish to pay $50 to get out of jail?" << endl;
+                string temp;
+                cin >> temp;
+                if (temp == "yes") {              // paying to get out of jail
+                    turnsJail = 0;
+                    balance -= 50;
+                    return true;
+                }
+            }
+
+
+          if(turnsJail == 1){                // waited out turns in jail
+             turnsJail -= 1;
+             return true;
+          }
+
+          if(turnsJail > 1){                // decrementing turns left in jail
+              turnsJail -= 1;
+              return false;
+          }
+
+    return false;           // if not on jail position
         }
 
 void chanceCard(int numPlayers, Player allPlayers[])
@@ -539,7 +593,7 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 6:
-      cout << "You pulled Advance to Nearest Utitiliy from the chance deck!" << endl;
+      cout << "You pulled Advance to Nearest Utility from the chance deck!" << endl;
       if(position < 12) position = 12;
       else if(position >= 28)
       {

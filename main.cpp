@@ -30,6 +30,11 @@ if(computerGame)
 }
 else allPlayers[numPlayers-1].setComputer();
 
+for(int i = 0; i<numPlayers; i++)
+{
+  allPlayers[i].assignedNumber = i+1;
+}
+
 for(int i = 0; i<1000; i++)
 {
   for(int j = 0; j<numPlayers; j++)

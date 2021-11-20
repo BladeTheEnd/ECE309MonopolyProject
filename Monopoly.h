@@ -17,7 +17,6 @@ public:
     int rent3House;
     int rent4House;
     int rentHotel;
-    int buyHouse;
     bool isMortgaged;
     int mortgageValue;
     bool isChest;
@@ -28,6 +27,9 @@ public:
     bool isRailroad;
     bool isUtility;
     bool isJail;
+    int buyHouse;
+    int numHouses;
+    int ownerNumber;
 
     Property(){
          price = 0;
@@ -48,6 +50,7 @@ public:
          rent4House = 0;
          rentHotel = 0;
          buyHouse = 0;
+         ownerNumber = 0;
     }
 };
 
@@ -420,6 +423,7 @@ public:
     int ownYellow;
     int ownGreen;
     int ownDarkBlue;
+    int assignedNumber;
 
     
     void getBalance(Player &positionPlayer)
@@ -439,10 +443,13 @@ void setComputer()
 
 void rollDice(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
+
+int diceRoll1 = rand() % 6 + 1;
+int diceRoll2 = rand() % 6 + 1;
+int diceSum = diceRoll1 + diceRoll2;
+    
 if(turnsJail == 0)
 {
-    int diceRoll1 = rand() % 6 + 1;
-    int diceRoll2 = rand() % 6 + 1;
     
     if(diceRoll1 == diceRoll2)
     {
@@ -468,10 +475,17 @@ if(turnsJail == 0)
     }
 }
     
-    bool jailEscape =  jailCheck(positionBoard);
-    if(positionBoard.BoardSpaces[position].isChest == 1) chestCard(numPlayers, allPlayers);
-    if(positionBoard.BoardSpaces[position].isChance == 1) chanceCard(numPlayers, allPlayers);
     
+    bool jailEscape =  jailCheck(positionBoard);
+    if(positionBoard.BoardSpaces[position].isChest == 1) chestCard(positionBoard, numPlayers, allPlayers);
+    if(positionBoard.BoardSpaces[position].isChance == 1) chanceCard(positionBoard, numPlayers, allPlayers);
+    if(positionBoard.BoardSpaces[position].isTax == 1)
+    {
+        if(position == 4) balance = balance-min(200, getIncomeTax(positionBoard));
+        if(position == 38) balance = balance-75;
+    }
+    landOnProperty(positionBoard, allPlayers, numPlayers, diceSum);
+
     getPosition(positionBoard);
     
     if(numDoubles || jailEscape) rollDice(positionBoard, numPlayers, allPlayers); //or with jail boolean
@@ -482,6 +496,7 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
         if(position == 30) {
             position = 10;
             turnsJail = 3;
+            numDoubles = 0;
         }
 
     int diceRoll1 = rand() % 6 + 1;
@@ -494,26 +509,7 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
 
         }
 
-            if (jailFree >= 1) {
-                cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
-                string temp;
-                cin >> temp;
-                if(temp == "yes"){              // using get out of jail free card
-                    jailFree -= 1;
-                    turnsJail = 0;
-                    return true;
-                }
-            }
-            if(turnsJail > 0) {
-                cout << "Do you wish to pay $50 to get out of jail?" << endl;
-                string temp;
-                cin >> temp;
-                if (temp == "yes") {              // paying to get out of jail
-                    turnsJail = 0;
-                    balance -= 50;
-                    return true;
-                }
-            }
+
 
 
           if(turnsJail == 1){                // waited out turns in jail
@@ -529,9 +525,11 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
     return false;           // if not on jail position
         }
 
-void chanceCard(int numPlayers, Player allPlayers[])
+
+void chanceCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chanceIndex = rand() % 16 + 1;
+  chanceIndex = 10;
   
   switch(chanceIndex)
   {
@@ -593,7 +591,7 @@ void chanceCard(int numPlayers, Player allPlayers[])
       break;
       
       case 6:
-      cout << "You pulled Advance to Nearest Utility from the chance deck!" << endl;
+      cout << "You pulled Advance to Nearest Utiility from the chance deck!" << endl;
       if(position < 12) position = 12;
       else if(position >= 28)
       {
@@ -622,6 +620,8 @@ void chanceCard(int numPlayers, Player allPlayers[])
       case 10:
       cout << "You pulled Go to Jail from the chance deck!" << endl;
       position = 10;
+      turnsJail = 3;
+      numDoubles = 0;
       break;
       
       case 11:
@@ -657,9 +657,10 @@ void chanceCard(int numPlayers, Player allPlayers[])
   }
 }
 
-void chestCard(int numPlayers, Player allPlayers[])
+void chestCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chestIndex = rand() % 16 + 1;
+  chestIndex = 5;
   
   switch(chestIndex)
   {
@@ -692,6 +693,8 @@ void chestCard(int numPlayers, Player allPlayers[])
       case 5:
       cout << "You pulled Go to Jail. Go directly to jail, do not pass Go, do not collect $200 from the Community Chest!" << endl;
       position = 10;
+      turnsJail = 3;
+      numDoubles = 0;
       break;
       
       case 6:
@@ -750,6 +753,108 @@ void chestCard(int numPlayers, Player allPlayers[])
       break;
   }
   
+}
+
+int getIncomeTax(Board &positionBoard)
+{
+    int runningSum = balance;
+    for(int i = 0; i<40; i++)
+    {
+        if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber)
+        {
+            if(positionBoard.BoardSpaces[i].isMortgaged == 1) runningSum += positionBoard.BoardSpaces[i].mortgageValue;
+            else runningSum += positionBoard.BoardSpaces[i].price;
+            if(positionBoard.BoardSpaces[i].numHouses > 0)
+            {
+                if(numHouses == 5) runningSum += positionBoard.BoardSpaces[i].buyHouse;
+                else runningSum += positionBoard.BoardSpaces[i].numHouses * positionBoard.BoardSpaces[i].buyHouse;
+            }
+        }
+    }
+    return runningSum/10;
+}
+
+void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, int diceRoll)
+{
+    if(!(positionBoard.BoardSpaces[position].isParking || positionBoard.BoardSpaces[position].isGo || positionBoard.BoardSpaces[position].isJail || positionBoard.BoardSpaces[position].isChance || positionBoard.BoardSpaces[position].isChest || positionBoard.BoardSpaces[position].isTax))
+    {
+    int userResponse;
+    if(positionBoard.BoardSpaces[position].ownerNumber == 0)
+    {
+        if(isComputer)
+        {
+            if(balance >= positionBoard.BoardSpaces[position].price)
+            {
+              balance = balance - positionBoard.BoardSpaces[position].price;
+              positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+              cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+            }
+            else {} // auction
+        }
+        else
+        {
+            cout << "Would you like to buy " << positionBoard.BoardSpaces[position].name << "?" <<endl;
+            cout << "Enter 1 for Yes, or 2 for No." << endl;
+            cin >> userResponse;
+            if(userResponse)
+            {
+                balance = balance - positionBoard.BoardSpaces[position].price;
+                positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+                cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+            }
+            else {} // auction function later on
+        }
+    }
+    else if(positionBoard.BoardSpaces[position].isUtility)
+    {
+        if(positionBoard.BoardSpaces[12].ownerNumber == positionBoard.BoardSpaces[28].ownerNumber)
+        {
+            balance = balance - diceRoll * 10;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += diceRoll*10;
+        }
+        else
+        {
+          balance = balance - diceRoll * 4;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += diceRoll*4;  
+        }
+    }
+    else if(positionBoard.BoardSpaces[position].isRailroad)
+    {
+        int numRailroads = 0;
+        if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[5].ownerNumber) numRailroads++;
+        if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[15].ownerNumber) numRailroads++;
+        if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[25].ownerNumber) numRailroads++;
+        if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[35].ownerNumber) numRailroads++;
+
+        switch(numRailroads)
+        {
+            case 1:
+            balance = balance - 25;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += 25;
+            break;
+
+            case 2:
+            balance = balance - 50;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += 50;
+            break;
+
+            case 3:
+            balance = balance - 100;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += 100;
+            break;
+
+            case 4:
+            balance = balance - 200;
+            allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += 200;
+            break;
+        }
+    }
+    else
+    {
+        balance = balance - positionBoard.BoardSpaces[position].rent;
+        allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent;
+    }
+    }
 }
 
 Player()

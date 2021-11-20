@@ -48,6 +48,7 @@ public:
          rent4House = 0;
          rentHotel = 0;
          buyHouse = 0;
+
     }
 };
 
@@ -443,6 +444,7 @@ if(turnsJail == 0)
 {
     int diceRoll1 = rand() % 6 + 1;
     int diceRoll2 = rand() % 6 + 1;
+
     
     if(diceRoll1 == diceRoll2)
     {
@@ -466,6 +468,7 @@ if(turnsJail == 0)
       balance = balance + 200;
     }
     }
+
 }
     
     bool jailEscape =  jailCheck(positionBoard);
@@ -478,7 +481,7 @@ if(turnsJail == 0)
     
 }
 
-bool jailCheck(Board &positionBoard) { //what should function return if not on jail?
+bool jailCheck(Board &positionBoard) {
         if(position == 30) {
             position = 10;
             turnsJail = 3;
@@ -494,7 +497,7 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
 
         }
 
-            if (jailFree >= 1) {
+            if (jailFree >= 1 & position == 10) {
                 cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
                 string temp;
                 cin >> temp;
@@ -515,7 +518,6 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
                 }
             }
 
-
           if(turnsJail == 1){                // waited out turns in jail
              turnsJail -= 1;
              return true;
@@ -529,6 +531,27 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
     return false;           // if not on jail position
         }
 
+void auction(Board &positionBoard, int numPlayers, Player allPlayers[]) { // takes in bidding property
+        int bidPrice = 0;
+        int computerBidMax = positionBoard.BoardSpaces[position].price * 1.25;
+
+        cout << "The current bid for: " << positionBoard.BoardSpaces[position].name << "is at : " << bidPrice << endl;
+        for(int i = 0; i < numPlayers; i++) {
+            if(allPlayers[i].isComputer == 1) {
+            if(allPlayers[i].balance < computerBidMax){
+                cout << "Computer " << i << "has forfeit the auction" << endl;
+
+            }
+
+            }
+
+            cout << "do you wish to " ;
+
+        }
+
+
+
+    }
 void chanceCard(int numPlayers, Player allPlayers[])
 {
   int chanceIndex = rand() % 16 + 1;

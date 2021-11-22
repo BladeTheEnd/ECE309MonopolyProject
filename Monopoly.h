@@ -412,6 +412,7 @@ public:
     int jailOut; // has a get out of jail free card
     int jailFree;
     bool isComputer;
+    bool isAuction;
     int numDoubles;
     int numHouses;
     int numHotels;
@@ -492,7 +493,7 @@ if(turnsJail == 0)
     
 }
 
-bool jailCheck(Board &positionBoard) { //what should function return if not on jail?
+bool jailCheck(Board &positionBoard) {
         if(position == 30) {
             position = 10;
             turnsJail = 3;
@@ -529,7 +530,6 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
 void chanceCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chanceIndex = rand() % 16 + 1;
-  chanceIndex = 10;
   
   switch(chanceIndex)
   {
@@ -660,7 +660,6 @@ void chanceCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 void chestCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chestIndex = rand() % 16 + 1;
-  chestIndex = 5;
   
   switch(chestIndex)
   {
@@ -796,13 +795,15 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
             cout << "Would you like to buy " << positionBoard.BoardSpaces[position].name << "?" <<endl;
             cout << "Enter 1 for Yes, or 2 for No." << endl;
             cin >> userResponse;
-            if(userResponse)
+            if(userResponse == 1)
             {
                 balance = balance - positionBoard.BoardSpaces[position].price;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
                 cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
             }
-            else {} // auction function later on
+            else {
+                auction(positionBoard, numPlayers, allPlayers);
+            } // auction function
         }
     }
     else if(positionBoard.BoardSpaces[position].isUtility)
@@ -857,6 +858,80 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
 }
 
+    void auction(Board &positionBoard, int numPlayers, Player allPlayers[]) { // takes in bidding property
+        int bidPrice = 0;
+        int computerBidMax = positionBoard.BoardSpaces[position].price * 1.25;
+        bool auctionContinue = true;
+        int chosenComp = -1;
+
+
+        cout << "The current auction is for: " << positionBoard.BoardSpaces[position].name << endl;
+        for(int i = 0; i < numPlayers; i++) {
+            allPlayers[i].isAuction = true;
+
+            if(allPlayers[i].isComputer == 1) {
+                if(allPlayers[i].balance < computerBidMax){
+                    allPlayers[i].isAuction = false;
+                    cout << "Player " << i << "has dropped out of the auction" << endl;
+                }
+            }
+        }
+
+        for(int i = 0; i < numPlayers; i++){
+            if(allPlayers[i].isComputer == 1 && allPlayers[i].isAuction == true) {
+                 chosenComp = i;
+                bidPrice = computerBidMax;
+                break;
+            }
+        }
+
+        if(chosenComp != -1){
+            for(int i = 0; i < numPlayers; i++){
+                if(allPlayers[i].isComputer == 1){
+                    allPlayers[i].isAuction = 0;
+                }
+            }
+            allPlayers[chosenComp].isAuction = 1;
+            cout << "Player " << chosenComp+1 << " has bid " << bidPrice << endl;
+        }
+
+while(auctionContinue) {
+    string cont;
+    int tempBidPrice;
+    int numAuction = 0;
+    int auctionWinner;
+
+    for (int i = 0; i < numPlayers; i++) {
+if(allPlayers[i].isComputer == false && allPlayers[i].isAuction == true){
+    numAuction += 1;
+    cout << "Player " << i+1 << " would you like to continue bidding on this property? (Type yes or no)" << endl;
+    cin >> cont;
+    if(cont == "no"){
+        allPlayers[i].isAuction = false;
+        cout << "Player " << i+1 << " has dropped out of the auction " << endl;
+    }
+    if(cont == "yes"){
+        cout << "The current bidding price is at " << bidPrice << " please enter a larger bid" << endl;
+        cin >> tempBidPrice;
+        if(tempBidPrice > bidPrice && allPlayers[i].balance >= tempBidPrice){
+            bidPrice = tempBidPrice;
+            auctionWinner = i;
+            cout << "The current bid has now been raised to " << bidPrice << endl;
+        }
+    }
+}
+    }
+    if(numAuction == 1){
+        auctionContinue = false;
+        cout << "The winner of the bid is player " << auctionWinner+1 << endl;
+        positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+    }
+
+
+}
+
+    }
+
 Player()
 {
   isComputer = 0;
@@ -868,6 +943,7 @@ Player()
         turnsJail = 0;
         jailFree = 0;
         jailOut = 0;
+        isAuction = false;
         ownBrown = 0;
         ownLightBlue = 0;
         ownPink = 0;
@@ -876,5 +952,6 @@ Player()
         ownYellow = 0;
         ownGreen = 0;
         ownDarkBlue = 0;
+
 }
 };

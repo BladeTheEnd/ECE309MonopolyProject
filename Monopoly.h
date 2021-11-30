@@ -29,6 +29,7 @@ public:
     bool isJail;
     int buyHouse;
     int numHouses;
+    int numHotels;
     int ownerNumber;
 
     Property(){
@@ -50,6 +51,7 @@ public:
          rent4House = 0;
          rentHotel = 0;
          buyHouse = 0;
+         numHotels = 0;
          ownerNumber = 0;
     }
 };
@@ -381,7 +383,7 @@ public:
         BoardSpaces[37].rent3House = 1100;
         BoardSpaces[37].rent4House = 1300;
         BoardSpaces[37].rentHotel = 1500;
-        BoardSpaces[1].buyHouse = 200;
+        BoardSpaces[37].buyHouse = 200;
 
         BoardSpaces[38].name = "Luxury Tax";
         BoardSpaces[38].isTax = 1;
@@ -424,6 +426,7 @@ public:
     int ownGreen;
     int ownDarkBlue;
     int assignedNumber;
+    bool isAuction;
 
     
     void getBalance(Player &positionPlayer)
@@ -492,7 +495,7 @@ if(turnsJail == 0)
     
 }
 
-bool jailCheck(Board &positionBoard) { //what should function return if not on jail?
+bool jailCheck(Board &positionBoard) {
         if(position == 30) {
             position = 10;
             turnsJail = 3;
@@ -509,8 +512,26 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
 
         }
 
-
-
+            if (jailFree >= 1 & position == 10) {
+                cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
+                string temp;
+                cin >> temp;
+                if(temp == "yes"){              // using get out of jail free card
+                    jailFree -= 1;
+                    turnsJail = 0;
+                    return true;
+                }
+            }
+            if(turnsJail > 0) {
+                cout << "Do you wish to pay $50 to get out of jail?" << endl;
+                string temp;
+                cin >> temp;
+                if (temp == "yes") {              // paying to get out of jail
+                    turnsJail = 0;
+                    balance -= 50;
+                    return true;
+                }
+            }
 
           if(turnsJail == 1){                // waited out turns in jail
              turnsJail -= 1;
@@ -529,7 +550,6 @@ bool jailCheck(Board &positionBoard) { //what should function return if not on j
 void chanceCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chanceIndex = rand() % 16 + 1;
-  chanceIndex = 10;
   
   switch(chanceIndex)
   {
@@ -660,7 +680,6 @@ void chanceCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 void chestCard(Board &positionBoard, int numPlayers, Player allPlayers[])
 {
   int chestIndex = rand() % 16 + 1;
-  chestIndex = 5;
   
   switch(chestIndex)
   {
@@ -676,7 +695,7 @@ void chestCard(Board &positionBoard, int numPlayers, Player allPlayers[])
       break;
       
       case 2:
-      cout << "You pulled Doctor’s fee. Pay $50 from the Community Chest!" << endl;
+      cout << "You pulled Doctor's fee. Pay $50 from the Community Chest!" << endl;
       balance = balance - 50;
       break;
       
@@ -796,13 +815,15 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
             cout << "Would you like to buy " << positionBoard.BoardSpaces[position].name << "?" <<endl;
             cout << "Enter 1 for Yes, or 2 for No." << endl;
             cin >> userResponse;
-            if(userResponse)
+            if(userResponse == 1)
             {
                 balance = balance - positionBoard.BoardSpaces[position].price;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
                 cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
             }
-            else {} // auction function later on
+            else {
+            auction(positionBoard, numPlayers, allPlayers);
+            } // auction function later on
         }
     }
     else if(positionBoard.BoardSpaces[position].isUtility)
@@ -857,6 +878,565 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
 }
 
+void buyHouse(Board &positionBoard)
+{
+    string colors[8];
+    int counter[8];
+    int possibilityArray[8];
+
+    colors[0] = "Brown";
+    colors[1] = "LightBlue";
+    colors[2] = "Pink";
+    colors[3] = "Orange";
+    colors[4] = "Red";
+    colors[5] = "Yellow";
+    colors[6] = "Green";
+    colors[7] = "DarkBlue";
+
+    for(int i = 0; i<8; i++)
+    {
+        counter[i] = 0;
+        possibilityArray[8] = 0;
+    }
+
+    for(int i = 0; i<40; i++)
+    {
+        if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber)
+        {
+            for(int j = 0; j<8; j++)
+            {
+                if(positionBoard.BoardSpaces[i].color == colors[j])
+                {
+                    counter[j]++;
+                }
+            }
+        }
+    } 
+
+    int runningSum = 0;
+
+    for(int j = 0; j<8; j++)
+    {
+        if(j == 0 || j == 8)
+        {
+            if(counter[j] == 2)
+            {
+            possibilityArray[j] = 1;
+            runningSum++;
+            }
+        }
+        else if(counter[j] == 3)
+        {
+            runningSum++;
+            possibilityArray[j] = 1;
+        } 
+    }
+
+    if(runningSum == 0)
+    {
+        cout << "You can not buy any real estate!" << endl;
+        return;
+    }
+    else
+    {
+        cout << "You can buy property for the following color sets:" << endl;
+        if(possibilityArray[0] == 1) cout << "1. Brown" << endl;
+        if(possibilityArray[1] == 1) cout << "2. Light Blue" << endl;
+        if(possibilityArray[2] == 1) cout << "3. Pink" << endl;
+        if(possibilityArray[3] == 1) cout << "4. Orange" << endl;
+        if(possibilityArray[4] == 1) cout << "5. Red" << endl;
+        if(possibilityArray[5] == 1) cout << "6. Yellow" << endl;
+        if(possibilityArray[6] == 1) cout << "7. Green" << endl;
+        if(possibilityArray[7] == 1) cout << "8. Dark Blue" << endl;
+
+        int userInput;
+        cout << "Enter the number corresponding to the color you would like to build on." << endl;
+        cin >> userInput;
+
+        if(possibilityArray[userInput-1] != 1) cout << "Invalid input! You will be returned to the action menu!" << endl;
+        else
+        {
+            int userChoice;
+            switch(userInput)
+            {
+                case 1:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Mediterranean Avenue" << endl;
+                cout << "2. Baltic Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 2) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[1].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[1].numHouses > positionBoard.BoardSpaces[3].numHouses && positionBoard.BoardSpaces[3].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[1].buyHouse){
+                    if(positionBoard.BoardSpaces[1].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[1].numHouses = 0;
+                        positionBoard.BoardSpaces[1].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[1].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[1].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+                }
+                if(userChoice == 2 && positionBoard.BoardSpaces[3].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[3].numHouses > positionBoard.BoardSpaces[1].numHouses && positionBoard.BoardSpaces[1].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[3].buyHouse){
+                    if(positionBoard.BoardSpaces[3].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[3].numHouses = 0;
+                        positionBoard.BoardSpaces[3].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[3].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[3].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 2:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Oriental Avenue" << endl;
+                cout << "2. Vermont Avenue" << endl;
+                cout << "3. Connecticut Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[6].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[6].numHouses > positionBoard.BoardSpaces[8].numHouses && positionBoard.BoardSpaces[8].numHotels == 0) && (positionBoard.BoardSpaces[6].numHouses > positionBoard.BoardSpaces[9].numHouses && positionBoard.BoardSpaces[9].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[6].buyHouse){
+                    if(positionBoard.BoardSpaces[6].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[6].numHouses = 0;
+                        positionBoard.BoardSpaces[6].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[6].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[6].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[8].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[8].numHouses > positionBoard.BoardSpaces[6].numHouses && positionBoard.BoardSpaces[6].numHotels == 0) && (positionBoard.BoardSpaces[8].numHouses > positionBoard.BoardSpaces[9].numHouses && positionBoard.BoardSpaces[9].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[8].buyHouse){
+                    if(positionBoard.BoardSpaces[8].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[8].numHouses = 0;
+                        positionBoard.BoardSpaces[8].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[8].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[8].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[9].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[9].numHouses > positionBoard.BoardSpaces[6].numHouses && positionBoard.BoardSpaces[6].numHotels == 0) && (positionBoard.BoardSpaces[9].numHouses > positionBoard.BoardSpaces[8].numHouses && positionBoard.BoardSpaces[8].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[9].buyHouse){
+                    if(positionBoard.BoardSpaces[9].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[9].numHouses = 0;
+                        positionBoard.BoardSpaces[9].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[9].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[9].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 3:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. St. Charles Place" << endl;
+                cout << "2. States Avenue" << endl;
+                cout << "3. Virginia Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[11].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[11].numHouses > positionBoard.BoardSpaces[13].numHouses && positionBoard.BoardSpaces[13].numHotels == 0) && (positionBoard.BoardSpaces[11].numHouses > positionBoard.BoardSpaces[14].numHouses && positionBoard.BoardSpaces[14].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[11].buyHouse){
+                    if(positionBoard.BoardSpaces[11].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[11].numHouses = 0;
+                        positionBoard.BoardSpaces[11].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[11].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[11].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[13].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[13].numHouses > positionBoard.BoardSpaces[11].numHouses && positionBoard.BoardSpaces[11].numHotels == 0) && (positionBoard.BoardSpaces[13].numHouses > positionBoard.BoardSpaces[14].numHouses && positionBoard.BoardSpaces[14].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[13].buyHouse){
+                    if(positionBoard.BoardSpaces[13].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[13].numHouses = 0;
+                        positionBoard.BoardSpaces[13].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[13].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[13].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[14].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[14].numHouses > positionBoard.BoardSpaces[11].numHouses && positionBoard.BoardSpaces[11].numHotels == 0) && (positionBoard.BoardSpaces[14].numHouses > positionBoard.BoardSpaces[13].numHouses && positionBoard.BoardSpaces[13].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[13].buyHouse){
+                    if(positionBoard.BoardSpaces[14].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[14].numHouses = 0;
+                        positionBoard.BoardSpaces[14].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[14].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[14].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 4:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. St. James Place" << endl;
+                cout << "2. Tennessee Avenue" << endl;
+                cout << "3. New York Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[16].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[16].numHouses > positionBoard.BoardSpaces[18].numHouses && positionBoard.BoardSpaces[18].numHotels == 0) && (positionBoard.BoardSpaces[16].numHouses > positionBoard.BoardSpaces[19].numHouses && positionBoard.BoardSpaces[19].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[16].buyHouse){
+                    if(positionBoard.BoardSpaces[16].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[16].numHouses = 0;
+                        positionBoard.BoardSpaces[16].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[16].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[16].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[18].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[18].numHouses > positionBoard.BoardSpaces[16].numHouses && positionBoard.BoardSpaces[16].numHotels == 0) && (positionBoard.BoardSpaces[18].numHouses > positionBoard.BoardSpaces[19].numHouses && positionBoard.BoardSpaces[19].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[18].buyHouse){
+                    if(positionBoard.BoardSpaces[18].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[18].numHouses = 0;
+                        positionBoard.BoardSpaces[18].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[18].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[18].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[19].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[19].numHouses > positionBoard.BoardSpaces[16].numHouses && positionBoard.BoardSpaces[16].numHotels == 0) && (positionBoard.BoardSpaces[19].numHouses > positionBoard.BoardSpaces[18].numHouses && positionBoard.BoardSpaces[18].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[19].buyHouse){
+                    if(positionBoard.BoardSpaces[19].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[19].numHouses = 0;
+                        positionBoard.BoardSpaces[19].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[19].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[19].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 5:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Kentucky Avenue" << endl;
+                cout << "2. Indiana Avenue" << endl;
+                cout << "3. Illinois Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[21].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[21].numHouses > positionBoard.BoardSpaces[23].numHouses && positionBoard.BoardSpaces[23].numHotels == 0) && (positionBoard.BoardSpaces[21].numHouses > positionBoard.BoardSpaces[24].numHouses && positionBoard.BoardSpaces[24].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[21].buyHouse){
+                    if(positionBoard.BoardSpaces[21].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[21].numHouses = 0;
+                        positionBoard.BoardSpaces[21].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[21].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[21].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[23].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[23].numHouses > positionBoard.BoardSpaces[21].numHouses && positionBoard.BoardSpaces[21].numHotels == 0) && (positionBoard.BoardSpaces[23].numHouses > positionBoard.BoardSpaces[24].numHouses && positionBoard.BoardSpaces[24].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[23].buyHouse){
+                    if(positionBoard.BoardSpaces[23].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[23].numHouses = 0;
+                        positionBoard.BoardSpaces[23].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[23].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[23].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[24].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[24].numHouses > positionBoard.BoardSpaces[21].numHouses && positionBoard.BoardSpaces[21].numHotels == 0) && (positionBoard.BoardSpaces[24].numHouses > positionBoard.BoardSpaces[23].numHouses && positionBoard.BoardSpaces[23].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[24].buyHouse){
+                    if(positionBoard.BoardSpaces[24].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[24].numHouses = 0;
+                        positionBoard.BoardSpaces[24].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[24].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[24].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 6:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Atlantic Avenue" << endl;
+                cout << "2. Ventnor Avenue" << endl;
+                cout << "3. Marvin Gardens" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[26].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[26].numHouses > positionBoard.BoardSpaces[27].numHouses && positionBoard.BoardSpaces[27].numHotels == 0) && (positionBoard.BoardSpaces[26].numHouses > positionBoard.BoardSpaces[29].numHouses && positionBoard.BoardSpaces[29].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[26].buyHouse){
+                    if(positionBoard.BoardSpaces[26].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[26].numHouses = 0;
+                        positionBoard.BoardSpaces[26].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[26].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[26].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[27].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[27].numHouses > positionBoard.BoardSpaces[26].numHouses && positionBoard.BoardSpaces[26].numHotels == 0) && (positionBoard.BoardSpaces[27].numHouses > positionBoard.BoardSpaces[29].numHouses && positionBoard.BoardSpaces[29].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[27].buyHouse){
+                    if(positionBoard.BoardSpaces[27].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[27].numHouses = 0;
+                        positionBoard.BoardSpaces[27].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[27].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[27].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[29].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[29].numHouses > positionBoard.BoardSpaces[26].numHouses && positionBoard.BoardSpaces[26].numHotels == 0) && (positionBoard.BoardSpaces[29].numHouses > positionBoard.BoardSpaces[27].numHouses && positionBoard.BoardSpaces[27].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[29].buyHouse){
+                    if(positionBoard.BoardSpaces[29].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[29].numHouses = 0;
+                        positionBoard.BoardSpaces[29].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[29].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[29].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 7:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Pacific Avenue" << endl;
+                cout << "2. North Carolina Avenue" << endl;
+                cout << "3. Pennsylvania Avenue" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 3) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[31].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[31].numHouses > positionBoard.BoardSpaces[32].numHouses && positionBoard.BoardSpaces[132].numHotels == 0) && (positionBoard.BoardSpaces[34].numHouses > positionBoard.BoardSpaces[34].numHouses && positionBoard.BoardSpaces[14].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[31].buyHouse){
+                    if(positionBoard.BoardSpaces[31].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[31].numHouses = 0;
+                        positionBoard.BoardSpaces[31].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[31].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[31].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[32].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[32].numHouses > positionBoard.BoardSpaces[31].numHouses && positionBoard.BoardSpaces[31].numHotels == 0) && (positionBoard.BoardSpaces[32].numHouses > positionBoard.BoardSpaces[34].numHouses && positionBoard.BoardSpaces[34].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[32].buyHouse){
+                    if(positionBoard.BoardSpaces[32].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[32].numHouses = 0;
+                        positionBoard.BoardSpaces[32].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[32].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[32].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[34].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 3 && (positionBoard.BoardSpaces[34].numHouses > positionBoard.BoardSpaces[31].numHouses && positionBoard.BoardSpaces[31].numHotels == 0) && (positionBoard.BoardSpaces[34].numHouses > positionBoard.BoardSpaces[32].numHouses && positionBoard.BoardSpaces[32].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[34].buyHouse){
+                    if(positionBoard.BoardSpaces[34].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[34].numHouses = 0;
+                        positionBoard.BoardSpaces[34].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[34].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[34].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+
+                case 8:
+                cout << "Enter the number of the corresponding property you would like to build real estate on." << endl;
+                cout << "1. Park Place" << endl;
+                cout << "2. Boardwalk" << endl;
+                cin >> userChoice;
+                if(userChoice < 1 || userChoice > 2) cout << "Invalid input." << endl;
+                if(userChoice == 1 && positionBoard.BoardSpaces[37].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 1 && (positionBoard.BoardSpaces[37].numHouses > positionBoard.BoardSpaces[39].numHouses && positionBoard.BoardSpaces[39].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[37].buyHouse){
+                    if(positionBoard.BoardSpaces[37].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[37].numHouses = 0;
+                        positionBoard.BoardSpaces[37].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[37].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[37].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                if(userChoice == 2 && positionBoard.BoardSpaces[39].numHotels == 1) cout << "You can not add more real estate to this property." << endl;
+                else if(userChoice == 2 && (positionBoard.BoardSpaces[39].numHouses > positionBoard.BoardSpaces[37].numHouses && positionBoard.BoardSpaces[37].numHotels == 0)) cout << "You must build on your other properties of this color first." << endl;
+                else
+                {
+                    if(balance > positionBoard.BoardSpaces[39].buyHouse){
+                    if(positionBoard.BoardSpaces[39].numHouses == 4)
+                    {
+                        positionBoard.BoardSpaces[39].numHouses = 0;
+                        positionBoard.BoardSpaces[39].numHotels = 1;
+                    }
+                    else positionBoard.BoardSpaces[39].numHouses++;
+                    balance = balance - positionBoard.BoardSpaces[39].buyHouse;
+                }
+                else cout << "You can not afford to buy real estate on this property." << endl;
+            }
+                break;
+            }
+        }
+    }
+}
+
+void auction(Board &positionBoard, int numPlayers, Player allPlayers[]) { // takes in bidding property
+        int bidPrice = 0;
+        int computerBidMax = positionBoard.BoardSpaces[position].price * 1.25;
+        bool auctionContinue = true;
+        int chosenComp = -1;
+
+
+        cout << "The current auction is for: " << positionBoard.BoardSpaces[position].name << endl;
+        for(int i = 0; i < numPlayers; i++) {
+            allPlayers[i].isAuction = true;
+
+            if(allPlayers[i].isComputer == 1) {
+                if(allPlayers[i].balance < computerBidMax){
+                    allPlayers[i].isAuction = false;
+                    cout << "Player " << i << "has dropped out of the auction" << endl;
+                }
+            }
+        }
+
+        for(int i = 0; i < numPlayers; i++){
+            if(allPlayers[i].isComputer == 1 && allPlayers[i].isAuction == true) {
+                 chosenComp = i;
+                bidPrice = computerBidMax;
+                break;
+            }
+        }
+
+        if(chosenComp != -1){
+            for(int i = 0; i < numPlayers; i++){
+                if(allPlayers[i].isComputer == 1){
+                    allPlayers[i].isAuction = 0;
+                }
+            }
+            allPlayers[chosenComp].isAuction = 1;
+            cout << "Player " << chosenComp+1 << " has bid " << bidPrice << endl;
+        }
+
+while(auctionContinue) {
+    string cont;
+    int tempBidPrice;
+    int numAuction = 0;
+    int auctionWinner;
+
+    for (int i = 0; i < numPlayers; i++) {
+if(allPlayers[i].isComputer == false && allPlayers[i].isAuction == true){
+    numAuction += 1;
+    cout << "Player " << i+1 << " would you like to continue bidding on this property? (Type yes or no)" << endl;
+    cin >> cont;
+    if(cont == "no"){
+        allPlayers[i].isAuction = false;
+        cout << "Player " << i+1 << " has dropped out of the auction " << endl;
+    }
+    if(cont == "yes"){
+        cout << "The current bidding price is at " << bidPrice << " please enter a larger bid" << endl;
+        cin >> tempBidPrice;
+        if(tempBidPrice > bidPrice && allPlayers[i].balance >= tempBidPrice){
+            bidPrice = tempBidPrice;
+            auctionWinner = i;
+            cout << "The current bid has now been raised to " << bidPrice << endl;
+        }
+    }
+}
+    }
+    if(numAuction == 1){
+        auctionContinue = false;
+        cout << "The winner of the bid is player " << auctionWinner+1 << endl;
+        positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+    }
+
+
+}
+
+    }
+
 Player()
 {
   isComputer = 0;
@@ -865,6 +1445,7 @@ Player()
         numHotels = 0;
         numHouses = 0;
         balance = 1500;
+        isAuction = false;
         turnsJail = 0;
         jailFree = 0;
         jailOut = 0;

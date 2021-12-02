@@ -40,8 +40,9 @@ for(int i = 0; i<1000; i++)
   for(int j = 0; j<numPlayers; j++)
   {
     if(allPlayers[j].isComputer == 1) cout << "This is a computer!" << endl;
-    else cout << "This is a player!" << endl;
+    else cout << "This is player " << j+1 << "!" << endl;
     allPlayers[j].rollDice(currentBoard, numPlayers, allPlayers);
+    allPlayers[j].actionMenu(currentBoard, allPlayers[j]);
   }
 }
 

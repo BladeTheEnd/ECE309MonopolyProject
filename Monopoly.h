@@ -431,7 +431,7 @@ public:
     
     void getBalance(Player &positionPlayer)
     {
-        cout << "position balance is: " << positionPlayer.balance << endl;
+        cout << "Current balance is: " << positionPlayer.balance << endl;
     }
 
 void getPosition(Board &positionBoard)
@@ -493,6 +493,67 @@ if(turnsJail == 0)
     
     if(numDoubles || jailEscape) rollDice(positionBoard, numPlayers, allPlayers); //or with jail boolean
     
+}
+
+void actionMenu(Board &positionBoard, Player &currentPlayer) {
+    int userinput = 0;
+
+    while(userinput != 6)
+    {
+        cout << "Select from the following menu the actions you would like to take:" << endl;
+        cout << "1. Current Balance" << endl;
+        cout << "2. Trade" << endl;
+        cout << "3. Mortgage Property" << endl;
+        cout << "4. Buy Real Estate" << endl;
+        cout << "5. Sell Real Estate" << endl;
+        cout << "6. End Turn" << endl;
+
+        cin >> userinput;
+
+        switch(userinput)
+        {
+            case 1:
+                getBalance(currentPlayer);
+
+            case 2:
+                Trade();
+                break;
+
+            case 3:
+                Mortgage();
+                break;
+
+            case 4:
+                buyHouse(positionBoard);
+                break;
+
+            case 5:
+                sellHouse();
+                break;
+
+            case 6:
+                break;
+
+            default:
+                cout << "Not a valid input" << endl;
+                break;
+        }
+    }
+
+}
+
+
+
+void Trade(){
+        cout << "Trade function not implemented yet, finish later" << endl;
+    }
+
+void Mortgage(){
+    cout << "Mortgage function not implemented yet, finish later" << endl;
+}
+
+void sellHouse(){
+    cout << "Sell house function not implemented yet, finish later" << endl;
 }
 
 bool jailCheck(Board &positionBoard) {

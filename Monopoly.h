@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <vector>
 #include<limits> //used to get numeric limits
 
 using namespace std;
@@ -428,6 +429,7 @@ public:
     int ownDarkBlue;
     int assignedNumber;
     bool isAuction;
+    vector<Property> OwnedProperties;
 
     
     void getBalance(Player &positionPlayer)
@@ -437,7 +439,7 @@ public:
 
 void getPosition(Board &positionBoard)
 {
-	cout << positionBoard.BoardSpaces[position].name << endl;
+    cout << positionBoard.BoardSpaces[position].name << endl;
 }
 
 void setComputer()
@@ -921,8 +923,11 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
               balance = balance - positionBoard.BoardSpaces[position].price;
               positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
               cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+              OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
-            else {} // auction
+            else {
+            auction(positionBoard, numPlayers, allPlayers);
+            } // auction
         }
         else
         {
@@ -934,13 +939,14 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
                 balance = balance - positionBoard.BoardSpaces[position].price;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
                 cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+                OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
             else {
             auction(positionBoard, numPlayers, allPlayers);
             } // auction function later on
         }
     }
-    else if(positionBoard.BoardSpaces[position].isUtility)
+    else if(positionBoard.BoardSpaces[position].isUtility && (!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0))
     {
         if(positionBoard.BoardSpaces[12].ownerNumber == positionBoard.BoardSpaces[28].ownerNumber)
         {
@@ -953,7 +959,7 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
             allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += diceRoll*4;  
         }
     }
-    else if(positionBoard.BoardSpaces[position].isRailroad)
+    else if(positionBoard.BoardSpaces[position].isRailroad && (!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0))
     {
         int numRailroads = 0;
         if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[5].ownerNumber) numRailroads++;
@@ -986,8 +992,44 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
     else
     {
-        balance = balance - positionBoard.BoardSpaces[position].rent;
-        allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent;
+        if(!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0)
+        {
+            switch(positionBoard.BoardSpaces[position].numHouses)
+            {
+                case 0:
+                if(numHotels == 1)
+                {
+                    balance = balance - positionBoard.BoardSpaces[position].rentHotel;
+                    allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rentHotel;
+                }
+                else
+                {
+                    balance = balance - positionBoard.BoardSpaces[position].rent;
+                    allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent;
+                }
+                break;
+
+                case 1:
+                balance = balance - positionBoard.BoardSpaces[position].rent1House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent1House;
+                break;
+
+                case 2:
+                balance = balance - positionBoard.BoardSpaces[position].rent2House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent2House;
+                break;
+
+                case 3:
+                balance = balance - positionBoard.BoardSpaces[position].rent3House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent3House;
+                break;
+
+                case 4:
+                balance = balance - positionBoard.BoardSpaces[position].rent4House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent4House;
+                break;
+            }
+        }
     }
     }
 }
@@ -1558,6 +1600,7 @@ void buyHouse(Board &positionBoard)
                 auctionContinue = false;
                 cout << "The winner of the bid is player " << auctionWinner+1 << endl;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+                allPlayers[auctionWinner].OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
 
 

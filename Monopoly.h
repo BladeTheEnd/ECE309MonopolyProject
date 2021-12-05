@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <time.h>
-#include<limits> //used to get numeric limits
 
 using namespace std;
 
@@ -554,7 +553,7 @@ void Trade(){
         cout << "Trade function not implemented yet, finish later" << endl;
     }
 
-void Mortgage(Board &positionBoard ,Player &currentPlayer){
+void Mortgage(Board &positionBoard, Player &currentPlayer){
         string propName;
         int mortgageSpace = 0;
     cin.ignore();
@@ -601,8 +600,52 @@ void Mortgage(Board &positionBoard ,Player &currentPlayer){
 
 }
 
-void Unmortgage(Board &positionBoard,Player &currentPlayer){
-    cout << "Unmortgage function not implemented yet, finish later" << endl;
+void Unmortgage(Board &positionBoard, Player &currentPlayer){
+    string propName;
+    int unmortgageSpace = 0;
+    int interest = 0;
+    cin.ignore();
+    while(unmortgageSpace == 0){
+        cout << " What property would you like to unmortgage? Type quit to exit" << endl;
+        getline(cin, propName);
+        if(propName == "quit"){
+            return;
+        }
+
+        for(int i = 0; i < 40; i++) {
+            if (positionBoard.BoardSpaces[i].name == propName) {
+                unmortgageSpace = i;
+            }
+        }
+        if(unmortgageSpace == 0){
+            cout << "The property name entered could not be found please try again" << endl;
+        }
+        if(unmortgageSpace != 0){
+            if(positionBoard.BoardSpaces[unmortgageSpace].mortgageValue ==0){
+                cout << "The property name entered cannot be unmortgaged, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+            else if(positionBoard.BoardSpaces[unmortgageSpace].ownerNumber != assignedNumber){
+                cout << "The property entered is not owned by you, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+
+            else if(positionBoard.BoardSpaces[unmortgageSpace].isMortgaged == false){
+                cout << "The property name entered is not mortgaged, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+            else if(currentPlayer.balance < positionBoard.BoardSpaces[unmortgageSpace].mortgageValue){
+
+            }
+
+            else{
+                positionBoard.BoardSpaces[unmortgageSpace].isMortgaged = false;
+                interest = positionBoard.BoardSpaces[unmortgageSpace].price / 10;
+                currentPlayer.balance = currentPlayer.balance - positionBoard.BoardSpaces[unmortgageSpace].mortgageValue - interest;
+                cout << "The property " << positionBoard.BoardSpaces[unmortgageSpace].name << " is now unmortgaged which cost " << positionBoard.BoardSpaces[unmortgageSpace].mortgageValue + interest << endl;
+            }
+        }
+    }
     }
 
 void sellHouse(){

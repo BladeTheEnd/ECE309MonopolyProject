@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <time.h>
-#include<limits> //used to get numeric limits
+#include <vector>
 
 using namespace std;
 
@@ -428,16 +428,18 @@ public:
     int ownDarkBlue;
     int assignedNumber;
     bool isAuction;
+    bool gameOver;
+    vector<Property> OwnedProperties;
 
     
-    void getBalance(Player &positionPlayer)
+    void getBalance()
     {
-        cout << "Current balance is: " << positionPlayer.balance << endl;
+        cout << "Current balance is: " << balance << endl;
     }
 
 void getPosition(Board &positionBoard)
 {
-	cout << positionBoard.BoardSpaces[position].name << endl;
+    cout << positionBoard.BoardSpaces[position].name << endl;
 }
 
 void setComputer()
@@ -458,12 +460,13 @@ if(turnsJail == 0)
     if(diceRoll1 == diceRoll2)
     {
       numDoubles++;
+      cout << "You rolled doubles and will get to move again!" << endl;
     }
     else numDoubles = 0;
     
     if(numDoubles == 3)
     {
-      position = 10;
+      position = 30;
       cout << "Three doubles rolled, go to jail!" << endl;
       numDoubles = 0;
     }
@@ -496,7 +499,7 @@ if(turnsJail == 0)
 
 }
 
-void actionMenu(Board &positionBoard, Player &currentPlayer) {
+void actionMenu(Board &positionBoard, Player &currentPlayer, Player allPlayers[], int numPlayers) {
     int userInput = 0;
 
     while(userInput != 7 && currentPlayer.isComputer == 0)
@@ -515,11 +518,11 @@ void actionMenu(Board &positionBoard, Player &currentPlayer) {
         switch(userInput)
         {
             case 1:
-                getBalance(currentPlayer);
+                getBalance();
                 break;
 
             case 2:
-                Trade();
+                Trade(positionBoard, allPlayers, numPlayers);
                 break;
 
             case 3:
@@ -534,7 +537,7 @@ void actionMenu(Board &positionBoard, Player &currentPlayer) {
                 break;
 
             case 6:
-                sellHouse();
+                sellHouse(positionBoard);
                 break;
 
             case 7:
@@ -550,11 +553,201 @@ void actionMenu(Board &positionBoard, Player &currentPlayer) {
 
 
 
-void Trade(){
-        cout << "Trade function not implemented yet, finish later" << endl;
+void Trade(Board &positionBoard, Player allPlayers[], int numPlayers){
+        int userInput;
+        int balanceOffered;
+        int balanceRequested;
+        vector<Property> tradeOffer;
+        vector<Property> tradeRequest;
+        
+        cout << "Player " << assignedNumber << " is beginning a trade" << endl;
+        cout << "Your current balance is ";
+        getBalance();
+        
+        if(OwnedProperties.size() == 0) cout << "You do not have any propeties to offer" << endl;
+        else
+        {
+        cout << "The current properties you own are:" << endl;
+          for(int i=0; i < OwnedProperties.size(); i++)
+          {
+            cout << i+1 << ". " << OwnedProperties[i].name << endl;
+          }
+        }
+        
+        for(int i = 0; i<numPlayers; i++)
+        {
+          if(allPlayers[i].assignedNumber != assignedNumber) cout << i+1 << ". Player " << i+1 << endl;
+        }
+        
+        cout << "Enter the number of the player you would like to trade with." << endl;
+        
+        cin >> userInput;
+        
+        if(userInput > numPlayers || userInput <= 0 || userInput == assignedNumber) cout << "Invalid Player" << endl;
+        else
+        {
+          cout << "Player " << userInput << " has a balance of ";
+          allPlayers[userInput - 1].getBalance();
+          if(allPlayers[userInput - 1].OwnedProperties.size() == 0) cout << "This player does not have any propeties to offer" << endl;
+          else
+          {
+            cout << "The current properties they own are:" << endl;
+            for(int i=0; i < OwnedProperties.size(); i++)
+            {
+            cout << i+1 << ". " << OwnedProperties[i].name << endl;
+            }
+          }
+          
+          int playerNum = userInput;
+          
+          cout << "Would you like to extend a deal to this player. Enter 1 for yes, 2 for no." << endl;
+          cin >> userInput;
+          
+          if(userInput != 1) cout << "Trade cancelled" << endl;
+          else
+          {
+            cout << "Enter the amount of money you are offering" << endl;
+            cin >> balanceOffered;
+            while(balanceOffered > balance || balanceOffered < 0)
+            {
+              cout << "Input is invalid or you can not afford this trade" << endl;
+              cin >> balanceOffered;
+            }
+            
+            cout << "Enter the amount of money you are requesting" << endl;
+            cin >> balanceRequested;
+            while(balanceRequested > allPlayers[playerNum - 1].balance || balanceRequested < 0)
+            {
+              cout << "Input is Invalid or other player can not afford this trade" << endl;
+              cin >> balanceRequested;
+            }
+            
+              cout << "According to the list of properties you own above, enter the number of a property you would like to offer. Enter 0 when you are ready to move on or if you own no properties" << endl;
+              while(userInput != 0)
+              {
+                cin >> userInput;
+                if(userInput != 0)
+                {
+                if(userInput > OwnedProperties.size() || userInput < 0) cout << "Invalid input" << endl;
+                else
+                {
+                if(OwnedProperties[userInput-1].numHotels == 0 && OwnedProperties[userInput-1].numHouses == 0)
+                {
+                cout << OwnedProperties[userInput-1].name << " has been added to your trade package." << endl;
+                tradeOffer.push_back(OwnedProperties[userInput-1]);
+                }
+                else cout << "Property has real estate and can not be traded" << endl;
+                }
+                }
+              }
+              
+              cout << "According to the list of properties the other player owns above, enter the number of a property you would like to recieve. Enter 0 when you are ready to move on or if they own no properties" << endl;
+              userInput = 1;
+              while(userInput != 0)
+              {
+                cin >> userInput;
+                if(userInput != 0)
+                {
+                if(userInput = 0) break;
+                if(userInput > allPlayers[userInput - 1].OwnedProperties.size() || userInput < 0) cout << "Invalid input" << endl;
+                else
+                {
+                if(allPlayers[userInput - 1].OwnedProperties[userInput-1].numHotels == 0 && allPlayers[userInput - 1].OwnedProperties[userInput-1].numHouses == 0)
+                {
+                cout << allPlayers[userInput - 1].OwnedProperties[userInput-1].name << " has been added to your trade package." << endl;
+                tradeOffer.push_back(allPlayers[userInput - 1].OwnedProperties[userInput-1]);
+                }
+                else cout << "Property has real estate and can not be traded" << endl;
+                }
+                }
+              }
+              
+              cout << "You are offering " << balanceOffered << " dollars and ";
+              if(tradeOffer.size() == 0) cout << "no properties" << endl;
+              else
+              {
+              cout << "the properties of ";
+              for(int i = 0; i < tradeOffer.size(); i++)
+              {
+                cout << tradeOffer[i].name << " ";
+              }
+              }
+              
+              cout << "For " << balanceRequested << " dollars and ";
+              if(tradeRequest.size() == 0) cout << "no properties" << endl;
+              else
+              {
+              cout << "the properties of ";
+              for(int i = 0; i < tradeRequest.size(); i++)
+              {
+                cout << tradeRequest[i].name << " ";
+              }
+              }
+              
+              cout << endl;
+              
+              cout << "Do you wish to extend this trade? Enter 1 for yes, or 2 for no." << endl;
+              
+              cin >> userInput;
+              if(userInput != 1) cout << "Trade cancelled" << endl;
+              else
+              {
+                if(allPlayers[playerNum-1].isComputer) cout << "Trade declined!" << endl;
+                else
+                {
+                  cout << "Player " << playerNum << " do you accept this offer? Enter 1 for yes, or 2 for no." << endl;
+                  cin >> userInput;
+                  if(userInput != 1) cout << "Trade cancelled" << endl;
+                  else
+                  {
+                    cout << "Trade accepted!" << endl;
+                    balance = balance - balanceOffered;
+                    balance = balance + balanceRequested;
+                    
+                    allPlayers[playerNum-1].balance = allPlayers[playerNum-1].balance + balanceOffered;
+                    allPlayers[playerNum-1].balance = allPlayers[playerNum-1].balance + balanceRequested;
+                    
+                    for(int i = 0; i < tradeRequest.size(); i++)
+                    {
+                      for(int j = 0; j<40; j++)
+                      {
+                        if(positionBoard.BoardSpaces[j].name == tradeRequest[i].name)
+                        {
+                          positionBoard.BoardSpaces[j].ownerNumber = assignedNumber;
+                          OwnedProperties.push_back(positionBoard.BoardSpaces[j]);
+                          for(int k = 0; k < OwnedProperties.size(); k++)
+                          {
+                            if(allPlayers[playerNum-1].OwnedProperties[k].name == tradeOffer[i].name) allPlayers[playerNum-1].OwnedProperties.erase(allPlayers[playerNum-1].OwnedProperties.begin() + k);
+                          }
+                        }
+                      }
+                    }
+                    
+                    for(int i = 0; i < tradeOffer.size(); i++)
+                    {
+                      for(int j = 0; j<40; j++)
+                      {
+                        if(positionBoard.BoardSpaces[j].name == tradeOffer[i].name)
+                        {
+                          positionBoard.BoardSpaces[j].ownerNumber = playerNum;
+                          allPlayers[playerNum-1].OwnedProperties.push_back(positionBoard.BoardSpaces[j]);
+                          for(int k = 0; k < OwnedProperties.size(); k++)
+                          {
+                            if(OwnedProperties[k].name == tradeOffer[i].name) OwnedProperties.erase(OwnedProperties.begin() + k);
+                          }
+                        }
+                      }
+                    }
+                    
+                  }
+                }
+              }
+          }
+          
+        }
     }
 
-void Mortgage(Board &positionBoard ,Player &currentPlayer){
+void Mortgage(Board &positionBoard, Player &currentPlayer){
         string propName;
         int mortgageSpace = 0;
     cin.ignore();
@@ -601,12 +794,499 @@ void Mortgage(Board &positionBoard ,Player &currentPlayer){
 
 }
 
-void Unmortgage(Board &positionBoard,Player &currentPlayer){
-    cout << "Unmortgage function not implemented yet, finish later" << endl;
+void Unmortgage(Board &positionBoard, Player &currentPlayer){
+    string propName;
+    int unmortgageSpace = 0;
+    int interest = 0;
+    cin.ignore();
+    while(unmortgageSpace == 0){
+        cout << " What property would you like to unmortgage? Type quit to exit" << endl;
+        getline(cin, propName);
+        if(propName == "quit"){
+            return;
+        }
+
+        for(int i = 0; i < 40; i++) {
+            if (positionBoard.BoardSpaces[i].name == propName) {
+                unmortgageSpace = i;
+            }
+        }
+        if(unmortgageSpace == 0){
+            cout << "The property name entered could not be found please try again" << endl;
+        }
+        if(unmortgageSpace != 0){
+            if(positionBoard.BoardSpaces[unmortgageSpace].mortgageValue ==0){
+                cout << "The property name entered cannot be unmortgaged, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+            else if(positionBoard.BoardSpaces[unmortgageSpace].ownerNumber != assignedNumber){
+                cout << "The property entered is not owned by you, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+
+            else if(positionBoard.BoardSpaces[unmortgageSpace].isMortgaged == false){
+                cout << "The property name entered is not mortgaged, try entering a different property" << endl;
+                unmortgageSpace = 0;
+            }
+            else if(currentPlayer.balance < positionBoard.BoardSpaces[unmortgageSpace].mortgageValue){
+
+            }
+
+            else{
+                positionBoard.BoardSpaces[unmortgageSpace].isMortgaged = false;
+                interest = positionBoard.BoardSpaces[unmortgageSpace].price / 10;
+                currentPlayer.balance = currentPlayer.balance - positionBoard.BoardSpaces[unmortgageSpace].mortgageValue - interest;
+                cout << "The property " << positionBoard.BoardSpaces[unmortgageSpace].name << " is now unmortgaged which cost " << positionBoard.BoardSpaces[unmortgageSpace].mortgageValue + interest << endl;
+            }
+        }
+    }
     }
 
-void sellHouse(){
-    cout << "Sell house function not implemented yet, finish later" << endl;
+void sellHouse(Board &positionBoard){
+    
+
+    int runningSum = 0;
+
+    for(int i = 0; i<40; i++)
+    {
+        if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber && (positionBoard.BoardSpaces[i].numHotels > 0 || positionBoard.BoardSpaces[i].numHouses < 0)) cout << i << ". " << positionBoard.BoardSpaces[i].name << endl;
+        runningSum++;
+    }
+
+    if(runningSum == 0) cout << "You have no houses you can sell.";
+    else
+    {
+        int userInput;
+        cout << "Enter the number corresponding to the house you would like to sell a house on." << endl;
+        cin >> userInput;
+        if(userInput < 0 || userInput > 39 || positionBoard.BoardSpaces[userInput].ownerNumber != assignedNumber || (positionBoard.BoardSpaces[userInput].numHotels == 0 && positionBoard.BoardSpaces[userInput].numHouses == 0)) cout << "Invalid input." << endl;
+        else
+        {
+            if(positionBoard.BoardSpaces[userInput].color == "Brown")
+            {
+                switch(userInput)
+                {
+                    case 1:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && positionBoard.BoardSpaces[3].numHotels == 1) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[3].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 3:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && positionBoard.BoardSpaces[1].numHotels == 1) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[1].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Light Blue")
+            {
+                switch(userInput)
+                {
+                    case 6:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[8].numHotels == 1 || positionBoard.BoardSpaces[9].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[8].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[9].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 8:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[6].numHotels == 1 || positionBoard.BoardSpaces[9].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[9].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[6].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 9:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[8].numHotels == 1 || positionBoard.BoardSpaces[6].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[6].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[8].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Pink")
+                {
+                switch(userInput)
+                {
+                    case 11:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[13].numHotels == 1 || positionBoard.BoardSpaces[14].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[13].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[14].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 13:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[11].numHotels == 1 || positionBoard.BoardSpaces[14].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[11].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[14].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 14:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[11].numHotels == 1 || positionBoard.BoardSpaces[13].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[11].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[13].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Orange")
+                {
+                switch(userInput)
+                {
+                    case 16:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[18].numHotels == 1 || positionBoard.BoardSpaces[19].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[18].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[19].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 18:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[16].numHotels == 1 || positionBoard.BoardSpaces[19].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[16].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[19].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 19:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[18].numHotels == 1 || positionBoard.BoardSpaces[16].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[18].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[16].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Red")
+                {
+                switch(userInput)
+                {
+                    case 21:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[23].numHotels == 1 || positionBoard.BoardSpaces[24].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[23].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[24].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 23:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[21].numHotels == 1 || positionBoard.BoardSpaces[24].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[21].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[24].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 24:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[23].numHotels == 1 || positionBoard.BoardSpaces[21].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[23].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[21].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Yellow")
+            {
+                switch(userInput)
+                {
+                    case 26:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[27].numHotels == 1 || positionBoard.BoardSpaces[29].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[27].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[29].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 27:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[26].numHotels == 1 || positionBoard.BoardSpaces[29].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[26].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[29].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 29:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[26].numHotels == 1 || positionBoard.BoardSpaces[27].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[26].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[27].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+
+            if(positionBoard.BoardSpaces[userInput].color == "Green")
+                {
+                switch(userInput)
+                {
+                    case 31:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[32].numHotels == 1 || positionBoard.BoardSpaces[34].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[32].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[34].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 32:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[31].numHotels == 1 || positionBoard.BoardSpaces[34].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[31].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[34].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 34:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && (positionBoard.BoardSpaces[31].numHotels == 1 || positionBoard.BoardSpaces[32].numHotels == 1)) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[31].numHouses || positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[32].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+            
+            if(positionBoard.BoardSpaces[userInput].color == "Dark Blue")
+            {
+                switch(userInput)
+                {
+                    case 37:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && positionBoard.BoardSpaces[39].numHotels == 1) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[39].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    case 39:
+                    if(positionBoard.BoardSpaces[userInput].numHotels == 1)
+                    {
+                        positionBoard.BoardSpaces[userInput].numHotels = 0;
+                        positionBoard.BoardSpaces[userInput].numHouses = 4;
+                        balance = balance + 0.5 * positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    else if(positionBoard.BoardSpaces[userInput].numHotels == 0 && positionBoard.BoardSpaces[37].numHotels == 1) cout << "You can not sell real estate on this property" << endl;
+                    else if(positionBoard.BoardSpaces[userInput].numHouses < positionBoard.BoardSpaces[37].numHouses) cout << "You can not sell real estate on this property" << endl;
+                    else
+                    {
+                        positionBoard.BoardSpaces[userInput].numHouses = positionBoard.BoardSpaces[userInput].numHouses--;
+                        balance = balance + 0.5*positionBoard.BoardSpaces[userInput].buyHouse;
+                    }
+                    break;
+
+                    default:
+                    break;
+                }
+            }
+        }
+    }
 }
 
 bool jailCheck(Board &positionBoard) {
@@ -921,8 +1601,11 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
               balance = balance - positionBoard.BoardSpaces[position].price;
               positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
               cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+              OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
-            else {} // auction
+            else {
+            auction(positionBoard, numPlayers, allPlayers);
+            } // auction
         }
         else
         {
@@ -934,13 +1617,14 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
                 balance = balance - positionBoard.BoardSpaces[position].price;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
                 cout << "Player " << assignedNumber << " has purchased " << positionBoard.BoardSpaces[position].name << "!" << endl;
+                OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
             else {
             auction(positionBoard, numPlayers, allPlayers);
             } // auction function later on
         }
     }
-    else if(positionBoard.BoardSpaces[position].isUtility)
+    else if(positionBoard.BoardSpaces[position].isUtility && (!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0))
     {
         if(positionBoard.BoardSpaces[12].ownerNumber == positionBoard.BoardSpaces[28].ownerNumber)
         {
@@ -953,7 +1637,7 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
             allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += diceRoll*4;  
         }
     }
-    else if(positionBoard.BoardSpaces[position].isRailroad)
+    else if(positionBoard.BoardSpaces[position].isRailroad && (!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0))
     {
         int numRailroads = 0;
         if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[5].ownerNumber) numRailroads++;
@@ -986,8 +1670,44 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
     else
     {
-        balance = balance - positionBoard.BoardSpaces[position].rent;
-        allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent;
+        if(!positionBoard.BoardSpaces[position].isMortgaged && allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].turnsJail == 0)
+        {
+            switch(positionBoard.BoardSpaces[position].numHouses)
+            {
+                case 0:
+                if(numHotels == 1)
+                {
+                    balance = balance - positionBoard.BoardSpaces[position].rentHotel;
+                    allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rentHotel;
+                }
+                else
+                {
+                    balance = balance - positionBoard.BoardSpaces[position].rent;
+                    allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent;
+                }
+                break;
+
+                case 1:
+                balance = balance - positionBoard.BoardSpaces[position].rent1House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent1House;
+                break;
+
+                case 2:
+                balance = balance - positionBoard.BoardSpaces[position].rent2House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent2House;
+                break;
+
+                case 3:
+                balance = balance - positionBoard.BoardSpaces[position].rent3House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent3House;
+                break;
+
+                case 4:
+                balance = balance - positionBoard.BoardSpaces[position].rent4House;
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += positionBoard.BoardSpaces[position].rent4House;
+                break;
+            }
+        }
     }
     }
 }
@@ -1558,6 +2278,7 @@ void buyHouse(Board &positionBoard)
                 auctionContinue = false;
                 cout << "The winner of the bid is player " << auctionWinner+1 << endl;
                 positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
+                allPlayers[auctionWinner].OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
             }
 
 

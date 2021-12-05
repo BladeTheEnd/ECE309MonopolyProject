@@ -9,10 +9,10 @@ Board currentBoard;
 int numPlayers;
 bool computerGame = 0;
 
-cout << "Welcome to Monopoly: ECE 309 version! Please enter the number of players that will be playing." << endl << "There will be a PC player who joins you. If you want to spectate a game of 4 PC players, enter 0." << endl;
+cout << "Welcome to Monopoly: ECE 309 version! Please enter the number of players that will be playing." << endl << "There will be a PC player who joins you. If you want to spectate a game of 4 PC players, enter 0. If input is invalid, a PC game will occur." << endl;
 cin >> numPlayers;
 
-if(numPlayers == 0) 
+if(numPlayers == 0 || numPlayers < 0) 
 {
 numPlayers = 4;
 computerGame = 1;
@@ -42,7 +42,7 @@ for(int i = 0; i<1000; i++)
     if(allPlayers[j].isComputer == 1) cout << "This is a computer!" << endl;
     else cout << "This is player " << j+1 << "!" << endl;
     allPlayers[j].rollDice(currentBoard, numPlayers, allPlayers);
-    allPlayers[j].actionMenu(currentBoard, allPlayers[j]);
+    allPlayers[j].actionMenu(currentBoard, allPlayers[j], allPlayers, numPlayers);
   }
 }
 

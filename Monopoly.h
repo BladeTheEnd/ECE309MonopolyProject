@@ -422,7 +422,6 @@ public:
 class Player: public Placeholder{
 private:
     int position;
-    int balance;
     int turnsJail; // turns potentially spent in jail
     int jailOut; // has a get out of jail free card
     int jailFree;
@@ -435,6 +434,7 @@ private:
 
 //these variables are used in main, so they have to be public.
 public:
+    int balance;
     int assignedNumber;
     bool gameOver;
     bool isComputer;
@@ -468,7 +468,7 @@ int diceRoll2 = rand() % 6 + 1;
 //it is important to store this info for the utility properties.
 int diceSum = diceRoll1 + diceRoll2;
 
-cout << "Player " << assignedNumber << " rolled to move " << diceSum << " spaces!" << endl;
+if(turnsJail == 0) cout << "Player " << assignedNumber << " rolled to move " << diceSum << " spaces!" << endl;
     
 if(turnsJail == 0) //check to see if the player is in jail, if so they can not move.
 {
@@ -489,8 +489,6 @@ if(turnsJail == 0) //check to see if the player is in jail, if so they can not m
     else
     {
     position = position + diceRoll1 + diceRoll2;
-    cout << "Player " << assignedNumber << " has moved to ";
-    getPosition(positionBoard);
     cout << endl;
     if(position >= 40)
     { 
@@ -498,6 +496,8 @@ if(turnsJail == 0) //check to see if the player is in jail, if so they can not m
       position = position - 40; //gotta adjust their position to wrap around the barrier
       balance = balance + 200; //increase their balance as apart of that
     }
+    cout << "Player " << assignedNumber << " has moved to ";
+    getPosition(positionBoard);
     }
 }
     
@@ -520,9 +520,139 @@ if(turnsJail == 0) //check to see if the player is in jail, if so they can not m
         }
     }
     landOnProperty(positionBoard, allPlayers, numPlayers, diceSum); //this function handles all that goes on for paying rent/buying property
+    checkBankrupt(positionBoard, allPlayers, numPlayers);
     
-    if(numDoubles || jailEscape) rollDice(positionBoard, numPlayers, allPlayers); //Here we use recursion. All players will go through this function. By this point, if they escaped jail, they will need a turn, so it will rego to give them the turn. Also, if they have doubles, we need to use recursion.
+    if((numDoubles || jailEscape) && !gameOver) rollDice(positionBoard, numPlayers, allPlayers); //Here we use recursion. All players will go through this function. By this point, if they escaped jail, they will need a turn, so it will rego to give them the turn. Also, if they have doubles, we need to use recursion.
 
+}
+
+void checkBankrupt(Board &positionBoard, Player allPlayers[], int numPlayers)
+{
+    //this function handles ending the game for a player and all of the things that must be done as that occurs.
+    bool givenUp = 0;
+
+    if(balance >= 0) return; //no need to do anything
+
+    while(true) //presents player their options for moving forward.
+    {
+        if(isComputer == 1) break; //computers will auto lose here.
+
+        int userInput;
+
+        while(userInput != 0)
+        {
+        //list all actions player can take and secure input.
+        cout << "Your balance is currently " << balance << ". You must perform the following actions to get a positive balance. Enter 0. If you have things to sell still, you will come back to this menu. If your balance is positive, the game will continue." << endl;
+        cout << "1. Trade" << endl;
+        cout << "2. Mortgage Property" << endl;
+        cout << "3. Sell Real Estate" << endl;
+        cout << "4. Give up" << endl;
+
+        cin >> userInput;
+
+        switch(userInput)
+        {
+            case 1:
+                Trade(positionBoard, allPlayers, numPlayers);
+                break;
+
+            case 2:
+                Mortgage(positionBoard);
+                break;
+
+            case 3:
+                sellHouse(positionBoard);
+                break;
+
+            case 4:
+            givenUp = 1;
+            break;
+
+            case 0:
+                break;
+
+            default:
+                cout << "Not a valid input" << endl;
+                break;
+        }
+        }
+
+        int unmortgagedSpaces = 0;
+
+        for(int i = 0; i<40; i++)
+            {
+                if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber && positionBoard.BoardSpaces[i].isMortgaged == 0) unmortgagedSpaces++;
+            }
+
+        if(givenUp)
+        {
+            cout << "Player has given up!" << endl;
+        }
+
+        if(balance > 0)
+        {
+            cout << "You have enough money to pay off your debt!" << endl;
+            break; //player can afford it now
+        }
+        if((numHousesOwned + numHotelsOwned) == 0 && unmortgagedSpaces == 0)
+        {
+            cout << "You have no other properties to use to gain money. Game over!" << endl;
+            break; //break because player has nothing to 
+        } 
+    }
+
+    if(balance > 0 && !givenUp) return; //check here to see if they left the while due to balance
+
+    gameOver = 1; //game is over for this player
+
+    if(positionBoard.BoardSpaces[position].ownerNumber == 0) //debt is to the bank. Unmortgage all properties then auction
+    {
+        for (int i = 0; i < 40; ++i)
+        {
+            if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber)
+            {
+                positionBoard.BoardSpaces[i].isMortgaged = 0;
+                auction(positionBoard, numPlayers, allPlayers, i);
+            }
+        }
+    }
+    else //debt is to player
+    {
+        int mortgageSum = 0;
+        if(balance > 0) //if there is some money, give to other player
+        {
+        allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance += balance;
+        cout << "Player " << positionBoard.BoardSpaces[position].ownerNumber << " has recieved " << balance << " dollars" << endl;
+        }
+
+        for(int i = 0; i < 40; ++i)
+        {
+           if(positionBoard.BoardSpaces[i].ownerNumber == assignedNumber)
+            {
+                if(positionBoard.BoardSpaces[i].isMortgaged) // need to ask player if they want to unmortgage, then collect proper fees.
+                {
+                    mortgageSum += positionBoard.BoardSpaces[i].price/10;
+                    cout << "Player " << positionBoard.BoardSpaces[position].ownerNumber << ", would you like to unmortgage" << positionBoard.BoardSpaces[i].name << "?" << "Enter 1 for yes, 2 for no." << endl;
+                    int userInput;
+                    cin >> userInput;
+
+                    if(userInput == 1) 
+                    {
+                        mortgageSum += positionBoard.BoardSpaces[i].price/10;
+                        positionBoard.BoardSpaces[i].isMortgaged = 0;
+                    }
+                    else if(userInput == 2);
+                    else cout << "Invalid input. Property will remain mortgaged for now" << endl;
+                } 
+                //transfer ownership
+                allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].OwnedProperties.push_back(positionBoard.BoardSpaces[i]);
+                positionBoard.BoardSpaces[i].ownerNumber = positionBoard.BoardSpaces[position].ownerNumber;
+            } 
+        }
+        OwnedProperties.clear();
+        allPlayers[positionBoard.BoardSpaces[position].ownerNumber-1].balance -= mortgageSum;
+        cout << "Recieving player has paid " << mortgageSum << " in taxes and unmortgaging fees!";
+    }
 }
 
 void actionMenu(Board &positionBoard, Player &currentPlayer, Player allPlayers[], int numPlayers) {
@@ -530,7 +660,7 @@ void actionMenu(Board &positionBoard, Player &currentPlayer, Player allPlayers[]
     //It serves really as a control path, as it lets the player choose the action they wish to take and then calls the corresponding function.
     int userInput = 0;
 
-    while(userInput != 7 && currentPlayer.isComputer == 0)
+    while(userInput != 8 && currentPlayer.isComputer == 0 && currentPlayer.gameOver == 0)
     {
         //list all actions player can take and secure input.
         cout << "Select from the following menu the actions you would like to take:" << endl;
@@ -556,7 +686,7 @@ void actionMenu(Board &positionBoard, Player &currentPlayer, Player allPlayers[]
                 break;
 
             case 3:
-                Mortgage(positionBoard,currentPlayer);
+                Mortgage(positionBoard);
                 break;
             case 4:
                 Unmortgage(positionBoard, currentPlayer);
@@ -610,6 +740,18 @@ void Trade(Board &positionBoard, Player allPlayers[], int numPlayers){
         int balanceRequested;
         vector<Property> tradeOffer;
         vector<Property> tradeRequest;
+
+        for(int i = 0; i<OwnedProperties.size(); i++) //vector contains property, really only used for size + name need to make sure houses/hotels are equal since they are checked here.
+        {
+            for(int j = 0; j<40; j++)
+            {
+                if(OwnedProperties[i].name == positionBoard.BoardSpaces[j].name)
+                {
+                    OwnedProperties[i].numHouses = positionBoard.BoardSpaces[j].numHouses;
+                    OwnedProperties[i].numHotels = positionBoard.BoardSpaces[j].numHotels;
+                }
+            }
+        }
         
         cout << "Player " << assignedNumber << " is beginning a trade." << endl;
 
@@ -658,6 +800,18 @@ void Trade(Board &positionBoard, Player allPlayers[], int numPlayers){
           
           //reuse the userInput variable, preserve this for later
           int playerNum = userInput;
+
+          for(int i = 0; i<allPlayers[playerNum - 1].OwnedProperties.size(); i++) //need to do same for other player
+        {
+            for(int j = 0; j<40; j++)
+            {
+                if(allPlayers[playerNum - 1].OwnedProperties[i].name == positionBoard.BoardSpaces[j].name)
+                {
+                    allPlayers[playerNum - 1].OwnedProperties[i].numHouses = positionBoard.BoardSpaces[j].numHouses;
+                    allPlayers[playerNum - 1].OwnedProperties[i].numHotels = positionBoard.BoardSpaces[j].numHotels;
+                }
+            }
+        }
           
           //after seeing what all can acquired, see if the player still wants to go through.
           cout << "Would you like to extend a deal to this player. Enter 1 for yes, 2 for no." << endl;
@@ -817,7 +971,7 @@ void Trade(Board &positionBoard, Player allPlayers[], int numPlayers){
     }
 
 
-void Mortgage(Board &positionBoard, Player &currentPlayer){
+void Mortgage(Board &positionBoard){
     //This function allows a user to mortgage a property they own.
         string propName;
         int mortgageSpace = 0;
@@ -857,7 +1011,7 @@ void Mortgage(Board &positionBoard, Player &currentPlayer){
           //then mortage the property
           else{
               positionBoard.BoardSpaces[mortgageSpace].isMortgaged = true;
-              currentPlayer.balance += positionBoard.BoardSpaces[mortgageSpace].mortgageValue;
+              balance += positionBoard.BoardSpaces[mortgageSpace].mortgageValue;
               cout << "The property " << positionBoard.BoardSpaces[mortgageSpace].name << " is now mortgaged, you have gained " << positionBoard.BoardSpaces[mortgageSpace].mortgageValue << endl;
           }
     }
@@ -1476,6 +1630,7 @@ bool jailCheck(Board &positionBoard) {
                 turnsJail = 0;
                 return true;
             }
+            else{
 
             //prompt the player to spend their card if they have one.
                 cout << "Do you wish to use your Get Out of Jail Free Card?" << endl;
@@ -1488,7 +1643,20 @@ bool jailCheck(Board &positionBoard) {
                     return true;
                 }
             }
+            }
             if(turnsJail > 0) {
+
+                if(isComputer){
+                if(balance >= 50)
+                {                // computer automatically uses get out of jail free card
+                cout << "Player " << assignedNumber << " has paid their way out of jail!" << endl;
+                jailFree -= 1;
+                turnsJail = 0;
+                balance = balance - 50;
+                return true;
+            }
+            }
+            else{
                 cout << "Do you wish to pay $50 to get out of jail?" << endl; // allow player to pay their way out of jail.
                 string temp;
                 cin >> temp;
@@ -1498,6 +1666,7 @@ bool jailCheck(Board &positionBoard) {
                     cout << "Player " << assignedNumber << "has paid their way out of jail!" << endl;
                     return true;
                 }
+            }
             }
 
             //check if player escapes by rolling doubles.
@@ -1530,8 +1699,8 @@ bool jailCheck(Board &positionBoard) {
               return false;
           }
 
-    return false;           // if not on jail position
         }
+        return false;           // if not on jail position
     }
 
 
@@ -1769,6 +1938,8 @@ int getIncomeTax(Board &positionBoard)
 {
     //this function simplifies income tax for the player
     // it calculates their property value and returns it
+
+    if(balance < 0) return 200; //debit the player 200 if they have no worth
     int runningSum = balance;
     for(int i = 0; i<40; i++)
     {
@@ -1834,6 +2005,7 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
     else if(positionBoard.BoardSpaces[position].isUtility && (!positionBoard.BoardSpaces[position].isMortgaged)) //utilities have unique dice rules, so they need their own case.
     {
+        cout << "Player " << assignedNumber << " must pay player " << positionBoard.BoardSpaces[position].ownerNumber << " rent!" << endl;
         if(positionBoard.BoardSpaces[12].ownerNumber == positionBoard.BoardSpaces[28].ownerNumber)
         {
             if(jailUtility != 0)
@@ -1865,6 +2037,7 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     }
     else if(positionBoard.BoardSpaces[position].isRailroad && (!positionBoard.BoardSpaces[position].isMortgaged)) //railroads also have unique rent rules
     {
+        cout << "Player " << assignedNumber << "must pay player " << positionBoard.BoardSpaces[position].ownerNumber << "rent!" << endl;
         int numRailroads = 0;
         if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[5].ownerNumber) numRailroads++;
         if(positionBoard.BoardSpaces[position].ownerNumber == positionBoard.BoardSpaces[15].ownerNumber) numRailroads++;
@@ -1898,6 +2071,7 @@ void landOnProperty(Board &positionBoard, Player allPlayers[], int numPlayers, i
     {
         if(!positionBoard.BoardSpaces[position].isMortgaged)
         {
+            cout << "Player " << assignedNumber << "must pay player " << positionBoard.BoardSpaces[position].ownerNumber << "rent!" << endl;
             switch(positionBoard.BoardSpaces[position].numHouses) //need to determine how much rent is based on number of houses.
             {
                 case 0: //either 0 houses or a hotel
@@ -2693,31 +2867,33 @@ void buyHouse(Board &positionBoard)
     }
 }
 
-    void auction(Board &positionBoard, int numPlayers, Player allPlayers[]) { // takes in bidding property
+    void auction(Board &positionBoard, int numPlayers, Player allPlayers[], int forcedProperty = 0) { // takes in bidding property
         //this function handles bid when players do not buy things.
+        int propertyforAuction = position;
+        if(forcedProperty != 0) propertyforAuction = forcedProperty;
         int bidPrice = 0;
-        int computerBidMax = positionBoard.BoardSpaces[position].price * 1.25; //computers wont bid over this
+        int computerBidMax = positionBoard.BoardSpaces[propertyforAuction].price * 1.25; //computers wont bid over this
         bool auctionContinue = true;
         int chosenComp = -1;
         int numAuction = 0;
         int auctionWinner= -1;
 
         //list what is being auction
-        cout << "The current auction is for: " << positionBoard.BoardSpaces[position].name << endl;
+        cout << "The current auction is for: " << positionBoard.BoardSpaces[propertyforAuction].name << endl;
         for(int i = 0; i < numPlayers; i++) {
-            allPlayers[i].isAuction = true;
+            if(allPlayers[i].gameOver == 0) allPlayers[i].isAuction = true;
 
             if(allPlayers[i].isComputer == 1) {
                 if(allPlayers[i].balance < computerBidMax){ //go ahead and drop computers if they can't afford it.
                     allPlayers[i].isAuction = false;
-                    cout << "Player " << i+1 << "has dropped out of the auction" << endl;
+                    cout << "Player " << i+1 << " has dropped out of the auction" << endl;
                 }
             }
         }
 
-        //computers automatically bid to their max
+        //computers automatically bid to their max. This is technically out of order, but it will save time since the players will have to deal with it anyway
         for(int i = 0; i < numPlayers; i++){
-            if(allPlayers[i].isComputer == 1 && allPlayers[i].isAuction == true) {
+            if(allPlayers[i].isComputer == 1 && allPlayers[i].isAuction == true && allPlayers[i].gameOver == 0) {
                 chosenComp = i;
                 bidPrice = computerBidMax;
                 break;
@@ -2747,7 +2923,7 @@ void buyHouse(Board &positionBoard)
 
 
             //manage auctioning
-            for (int i = 0; i < numPlayers; i++) {
+            for (int i = 0; i < numPlayers; i++) { 
                 if(allPlayers[i].isComputer == false && allPlayers[i].isAuction && numAuction > 1){
                     cout << "Player " << i+1 << " would you like to continue bidding on this property? (Type yes or no)" << endl;
                     cin >> cont;
@@ -2772,12 +2948,20 @@ void buyHouse(Board &positionBoard)
                         }
                     }
                 }
+                else
+                {
+                    for(int i = 0; i< numPlayers; i++)
+                    {
+                        if(allPlayers[i].isAuction == true) auctionWinner = i;
+                    }
+                }
             }
             if(numAuction == 1){
                 auctionContinue = false;
                 cout << "The winner of the bid is player " << auctionWinner+1 << endl;
-                positionBoard.BoardSpaces[position].ownerNumber = assignedNumber;
-                allPlayers[auctionWinner].OwnedProperties.push_back(positionBoard.BoardSpaces[position]);
+                allPlayers[auctionWinner].balance = allPlayers[auctionWinner].balance - bidPrice;
+                positionBoard.BoardSpaces[propertyforAuction].ownerNumber = assignedNumber;
+                allPlayers[auctionWinner].OwnedProperties.push_back(positionBoard.BoardSpaces[propertyforAuction]);
             }
 
 
@@ -2787,7 +2971,7 @@ void buyHouse(Board &positionBoard)
 
 Player()
 {
-  isComputer = 0;
+    isComputer = 0;
         position = 0;
         numDoubles = 0;
         numHotelsOwned = 0;
@@ -2798,6 +2982,7 @@ Player()
         jailFree = 0;
         jailOut = 0;
         jailUtility = 0;
+        gameOver = 0;
 }
 
 //Like the other objects, player has no dynamic memory or a reason for assignment.

@@ -31,7 +31,7 @@ srand(time(NULL));
 Board currentBoard; //Declares the board object that the game takes place on.
 int numPlayers; //Number of participants.
 bool computerGame = 0; //Used later to determine if the game will be played by only computers.
-bool gameOver = 0; //use to stop the game
+bool endGame = 0; //use to stop the game
 int gameCounter = 0; //use to see how many players are aliminated.
 
 //Prompt the user for input. We are expecting them to input 0 or a positive number. In the case of an invalid input, it will just play a PC game. 
@@ -63,10 +63,12 @@ for(int i = 0; i<numPlayers; i++) //We have two methods of ownership that we use
   allPlayers[i].assignedNumber = i+1;
 }
 
-while(!gameOver) //this is the loop that facilitates gameplay. It will go on until there is just one character whose game over boolean is not set.
+while(!endGame) //this is the loop that facilitates gameplay. It will go on until there is just one character whose game over boolean is not set.
 {
   for(int i = 0; i<numPlayers; i++)
   {
+    if(allPlayers[i].gameOver == 0 && !endGame)
+    {
     cout << "It is player " << i+1 << "'s turn!" << endl;
     allPlayers[i].rollDice(currentBoard, numPlayers, allPlayers); //This function houses everything that matters when it comes to interacting with the board and moving.
     allPlayers[i].actionMenu(currentBoard, allPlayers[i], allPlayers, numPlayers); //This function gives the player the option to do several actions you may take in a turn of Monopoly.
@@ -74,9 +76,15 @@ while(!gameOver) //this is the loop that facilitates gameplay. It will go on unt
     {
       if(allPlayers[j].gameOver != 0) gameCounter++;
     }
-    if(gameCounter == (numPlayers-1)) gameOver = 1; // game is over
+    }
+    if(gameCounter == (numPlayers-1)) endGame = 1; // game is over
     else gameCounter = 0;
   }
+}
+
+for(int i = 0; i<numPlayers; i++)
+{
+  if(allPlayers[i].gameOver == 0) cout << "Congrats player " << i+1 << " you have won the game!";
 }
 
 return 0;
